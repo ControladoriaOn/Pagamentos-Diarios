@@ -1,911 +1,986 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Atualizar dashboard · Pagamentos</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-<style>
-  :root {
-    --plum: #3C003C;
-    --plum-deep: #2A0028;
-    --plum-light: #5C1A5C;
-    --orange: #FF6E00;
-    --orange-deep: #D25500;
-    --ink: #1A0F1A;
-    --muted: #6B5E6B;
-    --line: #E8E0E8;
-    --surface: #FFFFFF;
-    --bg: #FAF7F5;
-    --ok: #1F7A3D;
-    --warn: #C77700;
-    --err: #B91C1C;
-  }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
-  body {
-    font-family: 'Manrope', system-ui, sans-serif;
-    background: var(--bg);
-    color: var(--ink);
-    min-height: 100vh;
-    font-size: 15px;
-    line-height: 1.55;
-  }
-  .page {
-    max-width: 980px;
-    margin: 0 auto;
-    padding: 48px 32px 96px;
-  }
-  header.top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-bottom: 28px;
-    border-bottom: 1px solid var(--line);
-    margin-bottom: 40px;
-  }
-  .brand {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-  .brand-mark {
-    width: 40px; height: 40px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, var(--plum) 0%, var(--plum-light) 100%);
-    display: grid; place-items: center;
-    color: var(--orange);
-    font-family: 'Fraunces', serif;
-    font-weight: 700;
-    font-size: 22px;
-    box-shadow: 0 4px 12px rgba(60,0,60,0.25);
-  }
-  .brand-text h1 {
-    font-family: 'Fraunces', serif;
-    font-weight: 500;
-    font-size: 22px;
-    margin: 0;
-    letter-spacing: -0.01em;
-  }
-  .brand-text p {
-    margin: 2px 0 0;
-    font-size: 12px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-  }
-  .help-link {
-    color: var(--plum);
-    text-decoration: none;
-    font-weight: 500;
-    font-size: 13px;
-    padding: 8px 14px;
-    border-radius: 8px;
-    transition: background 0.15s;
-  }
-  .help-link:hover { background: rgba(60,0,60,0.06); }
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Pagamentos · Dashboard | ONTIME</title>
+    
+    <link rel="icon" type="image/png" href="https://controladoriaon.github.io/Controladoria/favicon.png?v=3">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ============================================================
+           CONFIGURAÇÕES GERAIS E VARIÁVEIS (DARK THEME EXCLUSIVO)
+           ============================================================ */
+        :root {
+            --purple-deep: #1a0a2e;
+            --purple-main: #3C003C;
+            --purple-light: #5a005a;
+            --purple-glow: rgba(60,0,60,0.4);
+            
+            --orange-main: #FF6E00;
+            --orange-hover: #ff8533;
+            --orange-glow: rgba(255,110,0,0.3);
+            --orange-dim: rgba(255,110,0,0.12);
+            
+            --bg-dark: #0f0a18;
+            --surface-1: #1a1423;
+            --surface-2: #241d2e;
+            --surface-3: #2f273a;
+            
+            --text-1: #ffffff;
+            --text-2: #a39eb5;
+            --text-3: #6b6580;
+            --border-color: rgba(255,255,255,0.08);
+            
+            --status-ok: #10b981;
+            --status-ok-bg: rgba(16,185,129,0.15);
+            --status-warn: #f59e0b;
+            --status-warn-bg: rgba(245,158,11,0.15);
+            --status-err: #ef4444;
+            --status-err-bg: rgba(239,68,68,0.15);
+            
+            --font-display: 'Syne', sans-serif;
+            --font-body: 'Outfit', sans-serif;
+            --shadow-card: 0 8px 32px rgba(0,0,0,0.4);
+            --radius-lg: 20px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            --sidebar-w: 280px;
+        }
 
-  .lead {
-    font-family: 'Fraunces', serif;
-    font-weight: 400;
-    font-size: 34px;
-    line-height: 1.15;
-    letter-spacing: -0.015em;
-    margin: 0 0 12px;
-    color: var(--ink);
-  }
-  .lead em {
-    font-style: italic;
-    color: var(--orange);
-    font-weight: 500;
-  }
-  .sub {
-    color: var(--muted);
-    margin: 0 0 32px;
-    max-width: 640px;
-  }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { margin: 0; padding: 0; }
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-dark);
+            color: var(--text-1);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            background-image: radial-gradient(circle at 15% 50%, rgba(60,0,60,0.15), transparent 25%),
+                              radial-gradient(circle at 85% 30%, rgba(255,110,0,0.05), transparent 25%);
+        }
 
-  /* Drop zone */
-  .dropzone {
-    border: 2px dashed var(--line);
-    border-radius: 18px;
-    padding: 56px 32px;
-    text-align: center;
-    background: var(--surface);
-    transition: all 0.2s;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-  }
-  .dropzone::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: radial-gradient(circle at 25% 0%, rgba(255,110,0,0.04) 0%, transparent 45%),
-                      radial-gradient(circle at 75% 100%, rgba(60,0,60,0.04) 0%, transparent 45%);
-    pointer-events: none;
-  }
-  .dropzone:hover, .dropzone.drag {
-    border-color: var(--orange);
-    background: #FFFBF5;
-    transform: translateY(-1px);
-    box-shadow: 0 12px 28px -12px rgba(255,110,0,0.25);
-  }
-  .dz-icon {
-    width: 56px; height: 56px;
-    margin: 0 auto 18px;
-    border-radius: 14px;
-    background: linear-gradient(135deg, var(--plum), var(--plum-light));
-    display: grid; place-items: center;
-    color: var(--orange);
-    font-size: 28px;
-    box-shadow: 0 8px 20px -6px rgba(60,0,60,0.3);
-  }
-  .dz-title {
-    font-family: 'Fraunces', serif;
-    font-size: 22px;
-    font-weight: 500;
-    margin: 0 0 6px;
-  }
-  .dz-sub {
-    color: var(--muted);
-    font-size: 14px;
-    margin: 0 0 22px;
-  }
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 22px;
-    border-radius: 10px;
-    font-family: 'Manrope', sans-serif;
-    font-weight: 600;
-    font-size: 14px;
-    border: 0;
-    cursor: pointer;
-    transition: all 0.15s;
-    text-decoration: none;
-  }
-  .btn-primary {
-    background: var(--orange);
-    color: white;
-    box-shadow: 0 4px 14px -4px rgba(255,110,0,0.5);
-  }
-  .btn-primary:hover {
-    background: var(--orange-deep);
-    transform: translateY(-1px);
-    box-shadow: 0 8px 22px -6px rgba(255,110,0,0.6);
-  }
-  .btn-primary:disabled {
-    background: #D4C9D4;
-    color: #8A7E8A;
-    cursor: not-allowed;
-    box-shadow: none;
-    transform: none;
-  }
-  .btn-ghost {
-    background: transparent;
-    color: var(--plum);
-    border: 1px solid var(--line);
-  }
-  .btn-ghost:hover { border-color: var(--plum); background: rgba(60,0,60,0.03); }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--orange-main); }
 
-  /* Arquivos detectados */
-  .detected {
-    margin-top: 36px;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    overflow: hidden;
-  }
-  .detected h2 {
-    font-family: 'Fraunces', serif;
-    font-weight: 500;
-    font-size: 18px;
-    margin: 0;
-    padding: 18px 24px;
-    border-bottom: 1px solid var(--line);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .detected h2 .counter {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
-    color: var(--muted);
-    font-weight: 400;
-  }
-  .file-list { list-style: none; margin: 0; padding: 0; }
-  .file-row {
-    display: grid;
-    grid-template-columns: 40px 1fr auto auto;
-    gap: 16px;
-    align-items: center;
-    padding: 14px 24px;
-    border-bottom: 1px solid var(--line);
-    animation: slideIn 0.3s ease-out;
-  }
-  .file-row:last-child { border-bottom: 0; }
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateY(-4px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .file-icon {
-    width: 36px; height: 36px;
-    border-radius: 8px;
-    display: grid; place-items: center;
-    font-size: 14px;
-    font-weight: 600;
-    font-family: 'JetBrains Mono', monospace;
-  }
-  .file-icon.ok { background: #EAF7EE; color: var(--ok); }
-  .file-icon.err { background: #FCE9E9; color: var(--err); }
-  .file-name {
-    font-weight: 500;
-    color: var(--ink);
-    margin: 0 0 2px;
-    word-break: break-all;
-  }
-  .file-meta {
-    font-size: 12px;
-    color: var(--muted);
-  }
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 4px 10px;
-    border-radius: 999px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-  }
-  .badge.ok { background: rgba(31,122,61,0.1); color: var(--ok); }
-  .badge.err { background: rgba(185,28,28,0.1); color: var(--err); }
-  .badge.protheus { background: rgba(60,0,60,0.08); color: var(--plum); }
-  .badge.nf_servico { background: rgba(255,110,0,0.1); color: var(--orange-deep); }
-  .badge.nf_titulo { background: rgba(199,119,0,0.1); color: var(--warn); }
-  .badge.reembolso { background: rgba(31,122,61,0.1); color: var(--ok); }
+        /* ============================================================
+           SIDEBAR E STATUS
+           ============================================================ */
+        .sidebar {
+            width: var(--sidebar-w);
+            background: linear-gradient(180deg, var(--purple-deep) 0%, var(--surface-1) 100%);
+            border-right: 1px solid var(--border-color);
+            display: flex; flex-direction: column; flex-shrink: 0; z-index: 100;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .sidebar-brand { height: 90px; display: flex; align-items: center; padding: 0 28px; gap: 14px; border-bottom: 1px solid var(--border-color); position: relative; overflow: hidden; }
+        .sidebar-brand::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, var(--orange-main), transparent); }
+        .sidebar-brand img { width: 42px; height: 42px; border-radius: 12px; box-shadow: 0 0 15px var(--orange-glow); border: 1px solid rgba(255,110,0,0.3); }
+        .sidebar-brand .brand-text { font-family: var(--font-display); font-size: 22px; font-weight: 800; letter-spacing: 1px; }
+        .sidebar-brand .brand-text span { color: var(--orange-main); margin-left: -2px; }
 
-  .file-count {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
-    color: var(--muted);
-    min-width: 80px;
-    text-align: right;
-  }
+        .sidebar-nav { padding: 24px 16px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+        .nav-item {
+            display: flex; align-items: center; gap: 14px; padding: 14px 18px; color: var(--text-2);
+            text-decoration: none; border-radius: var(--radius-md); font-weight: 500; font-size: 15px;
+            transition: all 0.2s; border: 1px solid transparent; background: none; cursor: pointer;
+            font-family: var(--font-body); text-align: left; width: 100%;
+        }
+        .nav-item i { font-size: 22px; transition: transform 0.2s; }
+        .nav-item:hover { color: var(--text-1); background: rgba(255,255,255,0.03); border-color: var(--border-color); }
+        .nav-item:hover i { transform: scale(1.1); color: var(--orange-main); }
+        .nav-item.active { background: linear-gradient(90deg, rgba(255,110,0,0.1), transparent); color: var(--orange-main); border-color: rgba(255,110,0,0.2); border-left: 3px solid var(--orange-main); }
 
-  /* Resumo */
-  .summary {
-    margin-top: 32px;
-    background: linear-gradient(135deg, var(--plum) 0%, var(--plum-deep) 100%);
-    color: white;
-    border-radius: 18px;
-    padding: 32px;
-    position: relative;
-    overflow: hidden;
-  }
-  .summary::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -20%;
-    width: 400px;
-    height: 400px;
-    background: radial-gradient(circle, rgba(255,110,0,0.15) 0%, transparent 60%);
-    pointer-events: none;
-  }
-  .summary h3 {
-    font-family: 'Fraunces', serif;
-    font-weight: 400;
-    font-size: 15px;
-    margin: 0 0 20px;
-    text-transform: uppercase;
-    letter-spacing: 0.16em;
-    color: rgba(255,255,255,0.7);
-    position: relative;
-  }
-  .summary-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 24px;
-    position: relative;
-  }
-  .sum-item .label {
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: rgba(255,255,255,0.6);
-    margin-bottom: 6px;
-  }
-  .sum-item .value {
-    font-family: 'Fraunces', serif;
-    font-weight: 400;
-    font-size: 32px;
-    letter-spacing: -0.01em;
-  }
-  .sum-item .value em {
-    font-style: normal;
-    color: var(--orange);
-  }
-  .sum-item .sub {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    color: rgba(255,255,255,0.6);
-    margin: 4px 0 0;
-  }
+        .sidebar-footer { padding: 16px; border-top: 1px solid var(--border-color); }
+        
+        .sidebar-stamp {
+            display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; margin-bottom: 12px;
+            background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: var(--radius-sm);
+            font-size: 11px; color: var(--text-2); font-weight: 500; text-align: center;
+        }
+        .sidebar-stamp .dot { width: 7px; height: 7px; background: var(--status-ok); border-radius: 50%; animation: pulse-dot 2.5s infinite; flex-shrink: 0; }
+        .sidebar-stamp.stale .dot { background: var(--status-warn); box-shadow: 0 0 0 3px rgba(245,158,11,0.3); }
+        .sidebar-stamp.error .dot { background: var(--status-err); box-shadow: 0 0 0 3px rgba(239,68,68,0.3); }
+        @keyframes pulse-dot { 0%{box-shadow: 0 0 0 0 rgba(16,185,129,0.5)} 70%{box-shadow: 0 0 0 5px rgba(16,185,129,0)} 100%{box-shadow: 0 0 0 0 rgba(16,185,129,0)} }
 
-  /* Ações finais */
-  .actions {
-    margin-top: 32px;
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-  .actions .hint {
-    color: var(--muted);
-    font-size: 13px;
-    margin-left: 8px;
-  }
+        .back-link {
+            display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 18px;
+            background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: var(--radius-md);
+            color: var(--text-2); text-decoration: none; font-size: 14px; font-weight: 600; transition: all 0.2s; width: 100%;
+        }
+        .back-link:hover { background: var(--orange-main); border-color: var(--orange-main); color: #fff; }
 
-  .state-empty { color: var(--muted); padding: 32px 24px; text-align: center; font-size: 14px; }
-  .fade-in { animation: fadeIn 0.4s ease-out; }
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 90; backdrop-filter: blur(4px); }
+        .hamburger { display: none; background: none; border: none; color: var(--text-1); font-size: 28px; cursor: pointer; }
 
-  /* Instruções passo-a-passo */
-  .steps {
-    margin-top: 40px;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    padding: 28px 32px;
-  }
-  .steps h3 {
-    font-family: 'Fraunces', serif;
-    font-weight: 500;
-    font-size: 18px;
-    margin: 0 0 18px;
-  }
-  .steps ol { padding-left: 22px; margin: 0; }
-  .steps li { margin-bottom: 10px; color: var(--ink); }
-  .steps li::marker { color: var(--orange); font-weight: 700; }
-  .steps code {
-    font-family: 'JetBrains Mono', monospace;
-    background: rgba(60,0,60,0.06);
-    color: var(--plum);
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 0.88em;
-  }
+        /* ============================================================
+           MAIN CONTENT & HEADER
+           ============================================================ */
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; scroll-behavior: smooth; }
 
-  /* Toast */
-  .toast {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--ink);
-    color: white;
-    padding: 12px 22px;
-    border-radius: 10px;
-    font-size: 14px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s;
-    z-index: 100;
-  }
-  .toast.show { opacity: 1; }
+        header {
+            height: 80px; background: rgba(15,10,24,0.8); backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color); display: flex; align-items: center;
+            justify-content: space-between; padding: 0 40px; position: sticky; top: 0; z-index: 50; gap: 16px; flex-wrap: wrap;
+        }
+        .header-left { display: flex; align-items: center; gap: 16px; }
+        .page-title { font-family: var(--font-display); font-size: 24px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .page-title i { color: var(--orange-main); }
+        .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
-  @media (max-width: 640px) {
-    .summary-grid { grid-template-columns: 1fr; }
-    .file-row { grid-template-columns: 40px 1fr; }
-    .file-row .badge, .file-row .file-count { grid-column: 2; justify-self: start; }
-  }
-</style>
+        /* ============================================================
+           SEÇÕES E TIPOGRAFIA
+           ============================================================ */
+        .content-area { padding: 32px 40px 120px; max-width: 1500px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 48px; }
+        
+        .section-title { 
+            font-family: var(--font-display); font-size: 22px; font-weight: 700; margin-bottom: 24px; 
+            display: flex; align-items: center; gap: 10px; line-height: 1.4; padding-bottom: 4px; 
+        }
+        .section-title i { color: var(--orange-main); font-size: 26px; }
+        
+        /* Datas com maior destaque */
+        .section-title .date { 
+            font-family: var(--font-body); font-weight: 600; font-size: 14px; margin-left: auto; 
+            color: var(--orange-main); background: var(--orange-dim); padding: 4px 14px; 
+            border-radius: 999px; border: 1px solid rgba(255,110,0,0.2);
+        }
+
+        /* ============================================================
+           KPIS (Tamanho da fonte reduzida e sem centavos)
+           ============================================================ */
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+        .kpi {
+            background: var(--surface-1); border-radius: 16px; padding: 22px 24px;
+            border: 1px solid var(--border-color); position: relative; overflow: hidden;
+            transition: transform 0.2s, border-color 0.2s; box-shadow: var(--shadow-card);
+        }
+        .kpi:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.15); }
+        .kpi.accent { background: linear-gradient(135deg, var(--purple-main) 0%, var(--purple-deep) 100%); color: white; border-color: var(--purple-light); }
+        .kpi.accent::before {
+            content: ''; position: absolute; top: -40px; right: -40px; width: 180px; height: 180px;
+            background: radial-gradient(circle, rgba(255,110,0,0.2) 0%, transparent 65%);
+        }
+        .kpi-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-2); margin: 0 0 12px; font-weight: 600; }
+        .kpi.accent .kpi-label { color: rgba(255,255,255,0.7); }
+        
+        .kpi-value { font-family: var(--font-display); font-weight: 800; font-size: 26px; letter-spacing: -0.01em; line-height: 1.2; display: flex; align-items: baseline; gap: 4px; position: relative; font-variant-numeric: tabular-nums; padding-bottom: 2px;}
+        .kpi-value .prefix { font-size: 15px; color: var(--text-3); font-weight: 500; font-family: var(--font-body); }
+        .kpi.accent .kpi-value .prefix { color: rgba(255,255,255,0.6); }
+        .kpi-value em { font-style: normal; color: var(--orange-main); }
+        
+        .kpi-sub { margin: 10px 0 0; font-size: 12.5px; color: var(--text-3); display: flex; align-items: center; gap: 6px; position: relative; }
+        .kpi.accent .kpi-sub { color: rgba(255,255,255,0.75); }
+        .kpi-chip { display: inline-flex; align-items: center; padding: 2px 8px; background: var(--orange-dim); color: var(--orange-main); border-radius: 999px; font-weight: 600; font-size: 11px; }
+
+        .card { background: var(--surface-1); border: 1px solid var(--border-color); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-card); }
+
+        /* ============================================================
+           ABAS E CATEGORIAS (PRÉVIA)
+           ============================================================ */
+        .cat-summary {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color); background: rgba(0,0,0,0.2);
+        }
+        .cat-item { padding: 14px 16px; border: 1px solid var(--border-color); border-radius: 11px; background: var(--surface-2); cursor: pointer; transition: all 0.2s;}
+        .cat-item.active { border-color: var(--orange-main); box-shadow: 0 4px 14px -6px var(--orange-glow); }
+        .cat-item .cat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-2); font-weight: 600; margin: 0 0 6px; }
+        .cat-item .cat-value { font-family: var(--font-display); font-size: 22px; font-weight: 700; line-height: 1.2; letter-spacing: -0.01em; color: var(--text-1); font-variant-numeric: tabular-nums;}
+        .cat-item .cat-sub { margin: 4px 0 0; font-size: 11px; color: var(--text-3); }
+
+        .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border-color); padding: 0 24px; background: rgba(0,0,0,0.1); }
+        .tab {
+            padding: 14px 18px; background: none; border: 0; border-bottom: 2px solid transparent;
+            font-family: inherit; font-size: 13.5px; font-weight: 600; color: var(--text-3);
+            cursor: pointer; transition: all 0.15s; margin-bottom: -1px; display: inline-flex; align-items: center; gap: 8px;
+        }
+        .tab:hover { color: var(--text-1); }
+        .tab.active { color: var(--orange-main); border-bottom-color: var(--orange-main); }
+        .tab-count { font-weight: 600; font-size: 11px; padding: 2px 7px; background: var(--surface-3); border-radius: 999px; color: var(--text-2); }
+        .tab.active .tab-count { background: var(--orange-dim); color: var(--orange-main); }
+
+        /* ============================================================
+           TOOLBAR & FILTROS
+           ============================================================ */
+        .toolbar { display: flex; gap: 10px; padding: 14px 24px; align-items: center; flex-wrap: wrap; }
+        
+        /* Barra de pesquisa menor e mais discreta */
+        .search { flex: 0 1 280px; min-width: 200px; position: relative; }
+        .search input {
+            width: 100%; padding: 9px 12px 9px 36px; border: 1px solid var(--border-color); border-radius: var(--radius-sm);
+            font-family: inherit; font-size: 13.5px; background: var(--surface-2); transition: all 0.15s; color: var(--text-1); outline: none;
+        }
+        .search input:focus { border-color: var(--orange-main); background: var(--surface-3); box-shadow: 0 0 0 3px rgba(255,110,0,0.1); }
+        .search::before { content: '⌕'; position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-3); font-size: 16px; pointer-events: none; }
+        
+        .filter-chip {
+            padding: 7px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--surface-2);
+            color: var(--text-2); font-family: inherit; font-size: 12.5px; font-weight: 500; cursor: pointer; transition: all 0.12s;
+        }
+        .filter-chip:hover { border-color: var(--orange-main); color: var(--text-1); }
+        
+        /* Correção Visual do Contraste para Pílulas Ativas */
+        .filter-chip.active { background: var(--orange-main); color: white; border-color: var(--orange-main); }
+        .filter-chip.active .pill { background: rgba(255,255,255,0.25); color: #ffffff !important; border-color: transparent; }
+        
+        /* Maior destaque para a contagem "Mostrando..." */
+        .toolbar-right { font-size: 13px; color: var(--text-1); font-weight: 500; margin-left: auto; }
+        .toolbar-right strong { color: var(--orange-main); font-weight: 700; font-variant-numeric: tabular-nums; font-size: 14px;}
+
+        /* ============================================================
+           TABELAS
+           ============================================================ */
+        .table-wrap { overflow-x: auto; }
+        table.data { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+        table.data thead th {
+            padding: 14px 20px; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
+            color: var(--text-2); background: var(--surface-2); border-bottom: 1px solid var(--border-color);
+            white-space: nowrap; position: sticky; top: 0; cursor: pointer; user-select: none; transition: background 0.2s;
+        }
+        table.data thead th:hover { background: var(--surface-3); color: var(--text-1); }
+        table.data thead th.sorted { color: var(--orange-main); }
+        table.data thead th.sorted::after { content: attr(data-dir); margin-left: 4px; color: var(--orange-main); }
+        
+        /* Modificador de alinhamento ao centro */
+        table.data th.center, table.data td.center { text-align: center !important; justify-content: center; }
+
+        table.data tbody tr { border-bottom: 1px solid var(--border-color); transition: background 0.1s; }
+        table.data tbody tr:hover { background: rgba(255,255,255,0.02); }
+        table.data tbody tr.flag-approval { background: rgba(245,158,11,0.08); }
+        table.data tbody tr.flag-approval:hover { background: rgba(245,158,11,0.15); }
+        
+        table.data td { padding: 14px 20px; vertical-align: middle; color: var(--text-1); }
+        table.data td.num { font-size: 13px; white-space: nowrap; font-variant-numeric: tabular-nums;}
+        table.data td.num.strong { font-weight: 600; color: var(--orange-main); }
+        table.data .hist { color: var(--text-3); font-size: 12px; }
+        
+        .pill { display: inline-flex; padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; background: var(--surface-3); color: var(--text-2); white-space: nowrap; border: 1px solid transparent; transition: all 0.2s;}
+        .pill.ok { background: var(--status-ok-bg); color: var(--status-ok); border-color: rgba(16,185,129,0.3); }
+        .pill.warn { background: var(--status-warn-bg); color: var(--status-warn); border-color: rgba(245,158,11,0.3); }
+        .pill.nf { background: rgba(255,110,0,0.1); color: var(--orange-main); border-color: rgba(255,110,0,0.3); }
+        .pill.bol { background: rgba(90,0,90,0.3); color: #d8b4fe; border-color: rgba(216,180,254,0.3); }
+        .pill.rd { background: var(--status-ok-bg); color: var(--status-ok); border-color: rgba(16,185,129,0.3); }
+
+        tfoot.data td { padding: 14px 20px; background: rgba(0,0,0,0.15); font-weight: 600; border-top: 2px solid var(--border-color); font-size: 13px; color: var(--text-2); }
+        tfoot.data .num { color: var(--orange-main); font-weight: 700; font-size: 14px; }
+
+        /* ============================================================
+           ALERTAS
+           ============================================================ */
+        .alerts { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-bottom: 24px; }
+        .alert { padding: 14px 18px; border-radius: 12px; font-size: 13px; display: flex; gap: 12px; align-items: center; border: 1px solid var(--border-color); background: var(--surface-1); }
+        .alert-icon { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; font-weight: 700; font-size: 14px; flex: 0 0 28px; }
+        .alert.warn { background: var(--status-warn-bg); border-color: rgba(245,158,11,0.2); color: var(--text-1); }
+        .alert.warn .alert-icon { background: var(--status-warn); color: white; }
+        .alert.info { background: var(--orange-dim); border-color: rgba(255,110,0,0.2); color: var(--text-1); }
+        .alert.info .alert-icon { background: var(--orange-main); color: white; }
+        .alert.ok { background: var(--status-ok-bg); border-color: rgba(16,185,129,0.2); color: var(--text-1); }
+        .alert.ok .alert-icon { background: var(--status-ok); color: white; }
+        .alert strong { font-weight: 600; color: var(--text-1); }
+
+        /* Estados e Loader */
+        #loader { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 60vh; color: var(--text-2); }
+        .spinner { width: 44px; height: 44px; border: 3px solid rgba(255,110,0,0.2); border-top-color: var(--orange-main); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 16px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .empty-state { padding: 80px 32px; text-align: center; background: var(--surface-1); border: 1px dashed var(--border-color); border-radius: var(--radius-lg); }
+        .empty-state h2 { font-family: var(--font-display); font-weight: 700; font-size: 24px; margin: 0 0 10px; color: var(--text-1); }
+        .empty-state p { color: var(--text-2); margin: 0 0 20px; max-width: 520px; margin-inline: auto; }
+        .empty-state a { color: var(--orange-main); font-weight: 600; text-decoration: none; }
+        .empty-state a:hover { text-decoration: underline; }
+
+        .retry-btn { margin-top: 15px; padding: 8px 16px; background-color: var(--orange-main); color: #fff; border: none; border-radius: 6px; cursor: pointer; font-family: var(--font-body); font-weight: 600;}
+        .retry-btn:hover { background-color: var(--orange-hover); }
+
+        /* Animações e Responsividade */
+        .reveal { animation: reveal 0.5s ease-out both; }
+        .scroll-section { animation: reveal 0.5s ease-out both; }
+        .scroll-section:nth-child(1) { animation-delay: 0.05s; }
+        .scroll-section:nth-child(2) { animation-delay: 0.15s; }
+        .scroll-section:nth-child(3) { animation-delay: 0.25s; }
+        @keyframes reveal { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 1024px) {
+            .sidebar { position: fixed; left: 0; top: 0; bottom: 0; transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); box-shadow: 10px 0 30px rgba(0,0,0,0.8); }
+            .sidebar-overlay.visible { display: block; }
+            .hamburger { display: block; }
+            .content-area { padding: 24px 20px 100px; }
+            header { padding: 0 20px; height: auto; min-height: 70px; padding-top: 12px; padding-bottom: 12px; }
+            .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+            .cat-summary { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 640px) {
+            .content-area { padding: 16px 12px 100px; gap: 32px; }
+            .kpi-grid { grid-template-columns: 1fr; }
+            .kpi-value { font-size: 24px; }
+        }
+    </style>
 </head>
 <body>
-<div class="page">
 
-  <header class="top">
-    <div class="brand">
-      <div class="brand-mark">₣</div>
-      <div class="brand-text">
-        <h1>Atualizar dashboard</h1>
-        <p>Ferramenta interna · uso restrito</p>
-      </div>
+<div class="sidebar-overlay" id="sidebarOverlay" data-action="toggleSidebar"></div>
+
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+        <img src="https://controladoriaon.github.io/Controladoria/logo-mascote.jpg" alt="ONTIME">
+        <div class="brand-text">ON<span>TIME</span></div>
     </div>
-    <a href="index.html" class="help-link">Ver dashboard →</a>
-  </header>
-
-  <h2 class="lead">Jogue as planilhas aqui e eu <em>gero o arquivo de dados</em> do portal.</h2>
-  <p class="sub">
-    Arraste os 4 arquivos (3 Consultas em .xlsx + o CSV do Protheus). Não importa o nome nem a ordem —
-    identifico cada um pelo conteúdo. Depois é só baixar o <code>data.json</code> e jogar no GitHub.
-  </p>
-
-  <div id="dz" class="dropzone" tabindex="0">
-    <div class="dz-icon">↑</div>
-    <p class="dz-title">Arraste os arquivos ou clique</p>
-    <p class="dz-sub">Aceita .xlsx e .csv · processamento 100% no seu navegador</p>
-    <button class="btn btn-primary" id="btn-pick">Selecionar arquivos</button>
-    <input type="file" id="file-input" multiple accept=".xlsx,.xls,.csv" style="display:none">
-  </div>
-
-  <div id="detected-wrap" style="display:none">
-    <div class="detected fade-in">
-      <h2>Arquivos processados <span class="counter" id="counter"></span></h2>
-      <ul class="file-list" id="file-list"></ul>
-    </div>
-
-    <div class="summary fade-in" id="summary-box">
-      <h3>Resumo do processamento</h3>
-      <div class="summary-grid">
-        <div class="sum-item">
-          <div class="label">Pago hoje</div>
-          <div class="value" id="sum-pago-val">—</div>
-          <div class="sub" id="sum-pago-qtd">— títulos</div>
+    <nav class="sidebar-nav">
+        <button class="nav-item active" data-target="dashboard" data-action="scrollTo">
+            <i class="ph-fill ph-chart-pie-slice"></i> Dashboard
+        </button>
+        <button class="nav-item" data-target="pagamentos-realizados" data-action="scrollTo">
+            <i class="ph-fill ph-check-circle"></i> Pagamentos Realizados
+        </button>
+        <button class="nav-item" data-target="previa-pagamentos" data-action="scrollTo">
+            <i class="ph-fill ph-calendar-blank"></i> Prévia de Pagamentos
+        </button>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="sidebar-stamp" id="stamp" aria-live="polite">
+            <span class="dot"></span>
+            <span id="stamp-text">carregando…</span>
         </div>
-        <div class="sum-item">
-          <div class="label">Previsto amanhã</div>
-          <div class="value" id="sum-prev-val">—</div>
-          <div class="sub" id="sum-prev-qtd">— títulos</div>
+        <a href="../" class="back-link"><i class="ph-bold ph-arrow-left"></i> Voltar ao Hub</a>
+    </div>
+</aside>
+
+<main class="main-content" id="scroll-container">
+    
+    <header id="main-header">
+        <div class="header-left">
+            <button class="hamburger" data-action="toggleSidebar"><i class="ph-bold ph-list"></i></button>
+            <div class="page-title"><i class="ph-fill ph-wallet"></i> Gestão de Pagamentos</div>
         </div>
-      </div>
+        <div class="header-right"></div>
+    </header>
+
+    <div class="content-area" id="contentArea">
+        <div id="loader">
+            <div class="spinner"></div>
+            <p>Sincronizando dados...</p>
+        </div>
+        
+        <div id="app-content" style="display:none;flex-direction:column;gap:48px;">
+            
+            <div id="dashboard" class="scroll-section">
+                <div id="alerts-container"></div>
+                <div id="kpis-container"></div>
+            </div>
+
+            <div id="pagamentos-realizados" class="scroll-section"></div>
+
+            <div id="previa-pagamentos" class="scroll-section"></div>
+            
+        </div>
     </div>
-
-    <div class="actions">
-      <button class="btn btn-primary" id="btn-download" disabled>↓ Baixar data.json</button>
-      <button class="btn btn-ghost" id="btn-reset">Recomeçar</button>
-      <span class="hint" id="hint">Processe pelo menos 1 arquivo para baixar</span>
-    </div>
-  </div>
-
-  <div class="steps">
-    <h3>Como usar (3 passos)</h3>
-    <ol>
-      <li>Arraste os 4 arquivos acima (ou clique em "Selecionar arquivos").</li>
-      <li>Clique em <strong>Baixar data.json</strong>. O arquivo vai para a pasta de Downloads.</li>
-      <li>
-        No GitHub, abra o repositório, clique em <code>data.json</code>, clique no ícone de lápis
-        (editar) e arraste o arquivo baixado por cima. Commite. Em ~1 minuto o dashboard está atualizado.
-      </li>
-    </ol>
-  </div>
-
-</div>
-
-<div class="toast" id="toast"></div>
+</main>
 
 <script>
-/* ============================================================
-   PARSERS E NORMALIZAÇÃO
-   ============================================================ */
+/**
+ * ============================================================================
+ * PAGAMENTOS DASHBOARD V2 - ARQUITETURA LIMPA & PREVENÇÃO XSS
+ * ============================================================================
+ */
 
-function parseBRNumber(x) {
-  if (x === null || x === undefined || x === '') return 0;
-  if (typeof x === 'number') return x;
-  let s = String(x).trim().replace(/R\$\s*/, '').replace(/\s/g, '');
-  if (!s) return 0;
-  if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');
-  const n = parseFloat(s);
-  return isNaN(n) ? 0 : n;
-}
-
-function parseBRDate(x) {
-  if (x === null || x === undefined || x === '') return null;
-  if (x instanceof Date && !isNaN(x)) {
-    const y = x.getFullYear();
-    const m = String(x.getMonth()+1).padStart(2,'0');
-    const d = String(x.getDate()).padStart(2,'0');
-    return `${y}-${m}-${d}`;
-  }
-  const s = String(x).trim();
-  if (!s || s === '/  /' || s === '//') return null;
-  const m = s.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
-  if (m) return `${m[3]}-${m[2]}-${m[1]}`;
-  // Serial do Excel (número de dias desde 1900-01-01)
-  const n = Number(s);
-  if (!isNaN(n) && n > 20000 && n < 80000) {
-    const d = new Date((n - 25569) * 86400 * 1000);
-    return parseBRDate(d);
-  }
-  return null;
-}
-
-function safeStr(x) {
-  if (x === null || x === undefined) return '';
-  return String(x).trim();
-}
-
-/* ============================================================
-   LEITURA DE ARQUIVOS
-   ============================================================ */
-
-async function readAsArrayBuffer(file) {
-  return new Promise((res, rej) => {
-    const r = new FileReader();
-    r.onload = () => res(r.result);
-    r.onerror = () => rej(r.error);
-    r.readAsArrayBuffer(file);
-  });
-}
-
-async function readAsText(file, encoding) {
-  return new Promise((res, rej) => {
-    const r = new FileReader();
-    r.onload = () => res(r.result);
-    r.onerror = () => rej(r.error);
-    r.readAsText(file, encoding || 'utf-8');
-  });
-}
-
-/* ============================================================
-   DETECÇÃO DE TIPO
-   ============================================================ */
-
-async function detectType(file) {
-  const name = file.name.toLowerCase();
-  if (name.endsWith('.csv')) {
-    const head = await readAsText(file.slice(0, 300), 'iso-8859-1');
-    if (head.startsWith('SE2')) return 'protheus';
-    return 'desconhecido';
-  }
-  if (name.endsWith('.xlsx') || name.endsWith('.xls')) {
-    const buf = await readAsArrayBuffer(file);
-    const wb = XLSX.read(buf, { type: 'array', cellDates: true });
-    const ws = wb.Sheets[wb.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
-    // Procura linha com "ID" na primeira coluna
-    let headerRow = -1;
-    for (let i = 0; i < Math.min(10, rows.length); i++) {
-      if (safeStr(rows[i][0]) === 'ID') { headerRow = i; break; }
-    }
-    if (headerRow === -1) return 'desconhecido';
-    const headers = rows[headerRow].map(safeStr);
-    if (headers.includes('TIPO DE DESPESA')) return 'reembolso';
-    if (headers.includes('VALOR TOTAL SERVIÇO')) return 'nf_servico';
-    if (headers.includes('N. TITULO') && !headers.includes('TIPO DE DESPESA')) return 'nf_titulo';
-    return 'desconhecido';
-  }
-  return 'desconhecido';
-}
-
-/* ============================================================
-   PARSERS ESPECÍFICOS
-   ============================================================ */
-
-async function parseProtheus(file) {
-  const text = await readAsText(file, 'iso-8859-1');
-  // Pular as 2 primeiras linhas (SE2 + vazia)
-  const lines = text.split(/\r?\n/);
-  const body = lines.slice(2).join('\n');
-  const parsed = Papa.parse(body, { header: true, delimiter: ';', skipEmptyLines: true });
-  const out = [];
-  for (const r of parsed.data) {
-    if (!safeStr(r['No. Titulo'])) continue;
-    out.push({
-      numero: safeStr(r['No. Titulo']),
-      parcela: safeStr(r['Parcela']),
-      prefixo: safeStr(r['Prefixo']),
-      tipo: safeStr(r['Tipo']),
-      natureza: safeStr(r['Natureza']),
-      fornecedor_cod: safeStr(r['Fornecedor']),
-      fornecedor: safeStr(r['Nome Fornece']),
-      dt_emissao: parseBRDate(r['DT Emissao']),
-      vencimento: parseBRDate(r['Vencimento']),
-      dt_baixa: parseBRDate(r['DT Baixa']),
-      valor: parseBRNumber(r['Vlr.Titulo']),
-      valor_rs: parseBRNumber(r['Vlr R$']),
-      valor_liquido: parseBRNumber(r['Val Liq Baix']),
-      historico: safeStr(r['Historico']),
-      forma_pgto: safeStr(r['Forma Pgto.']),
-      banco: safeStr(r['Banco For.']),
-    });
-  }
-  return out;
-}
-
-async function readXlsxWithAutoHeader(file) {
-  const buf = await readAsArrayBuffer(file);
-  const wb = XLSX.read(buf, { type: 'array', cellDates: true });
-  const ws = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: false });
-  let headerRow = -1;
-  for (let i = 0; i < Math.min(10, rows.length); i++) {
-    if (safeStr(rows[i][0]) === 'ID') { headerRow = i; break; }
-  }
-  if (headerRow === -1) return [];
-  const headers = rows[headerRow].map(safeStr);
-  return rows.slice(headerRow + 1)
-    .filter(r => safeStr(r[0]))
-    .map(r => {
-      const o = {};
-      headers.forEach((h, i) => o[h] = r[i]);
-      return o;
-    });
-}
-
-async function parseNFServico(file) {
-  const rows = await readXlsxWithAutoHeader(file);
-  return rows.map(r => {
-    const vs = parseBRNumber(r['VALOR TOTAL SERVIÇO']);
-    const vp = parseBRNumber(r['VALOR TOTAL PRODUTO']);
-    return {
-      id: parseInt(r['ID']) || null,
-      solicitante: safeStr(r['SOLICITANTE']),
-      numero_nf: safeStr(r['N. NF']),
-      natureza_cod: safeStr(r['NATUREZA']),
-      natureza: safeStr(r['DESC NATUREZA']),
-      fornecedor: safeStr(r['DESC FORNECEDOR']) || safeStr(r['FORNE NOVO']),
-      contato: safeStr(r['CONTATO']),
-      valor_servico: vs,
-      valor_produto: vp,
-      valor_total: vs + vp,
-      vencimento: parseBRDate(r['VENCIMENTO']),
-      dt_solicitacao: parseBRDate(r['DT SOLICITAÇÃO']),
-      dt_emissao: parseBRDate(r['DT EMISSÃO']),
-      aprovador: safeStr(r['APROVADOR']),
-      cnpj: safeStr(r['CNPJ FORNECE']),
-      empresa: safeStr(r['EMPRESA']),
-      observacoes: safeStr(r['OBSERVAÇÕES']),
-      status: safeStr(r['STATUS']),
-    };
-  });
-}
-
-async function parseNFTitulo(file) {
-  const rows = await readXlsxWithAutoHeader(file);
-  return rows.map(r => ({
-    id: parseInt(r['ID']) || null,
-    solicitante: safeStr(r['SOLICITANTE']),
-    numero_titulo: safeStr(r['N. TITULO']),
-    natureza_cod: safeStr(r['NATUREZA']),
-    natureza: safeStr(r['DESC NATUREZA']),
-    fornecedor: safeStr(r['DESC FORNECEDOR']) || safeStr(r['FORNE NOVO']),
-    valor_total: parseBRNumber(r['VALOR TOTAL']),
-    vencimento: parseBRDate(r['VENCIMENTO']),
-    dt_solicitacao: parseBRDate(r['DT SOLICITAÇÃO']),
-    dt_emissao: parseBRDate(r['DT EMISSÃO']),
-    aprovador: safeStr(r['APROVADOR']),
-    cnpj: safeStr(r['CNPJ FORNECE']),
-    empresa: safeStr(r['EMPRESA']),
-    historico: safeStr(r['HISTÓRICO']),
-    status: safeStr(r['STATUS']),
-  }));
-}
-
-async function parseReembolso(file) {
-  const rows = await readXlsxWithAutoHeader(file);
-  return rows.map(r => ({
-    id: parseInt(r['ID']) || null,
-    solicitante: safeStr(r['SOLICITANTE']),
-    tipo_solicitacao: safeStr(r['TIPO DE SOLICITAÇÃO']),
-    tipo_despesa: safeStr(r['TIPO DE DESPESA']),
-    natureza_cod: safeStr(r['CÓD. NATUREZA']),
-    fornecedor: safeStr(r['DESC FORNECEDOR']) || safeStr(r['FORNE NOVO']),
-    valor_total: parseBRNumber(r['VALOR TOTAL']),
-    vencimento: parseBRDate(r['VENCIMENTO']),
-    dt_emissao: parseBRDate(r['DT EMISSÃO']),
-    aprovador: safeStr(r['APROVADOR']),
-    cnpj: safeStr(r['CNPJ FORNECE']),
-    empresa: safeStr(r['EMPRESA']),
-    status: safeStr(r['STATUS']),
-  }));
-}
-
-/* ============================================================
-   AGREGAÇÃO
-   ============================================================ */
-
-function agregar(store) {
-  const pagos = store.protheus;
-  const totalPago = pagos.reduce((s, t) => s + t.valor_rs, 0);
-  const porTipo = {};
-  pagos.forEach(t => {
-    const k = t.tipo || '?';
-    porTipo[k] = (porTipo[k] || 0) + t.valor_rs;
-  });
-  const maiorPago = pagos.length ? pagos.reduce((a,b) => a.valor_rs > b.valor_rs ? a : b) : null;
-
-  const ns = store.nf_servico, nt = store.nf_titulo, rb = store.reembolso;
-  const totNS = ns.reduce((s,x) => s + x.valor_total, 0);
-  const totNT = nt.reduce((s,x) => s + x.valor_total, 0);
-  const totRB = rb.reduce((s,x) => s + x.valor_total, 0);
-  const totPrev = totNS + totNT + totRB;
-  const todos = [...ns, ...nt, ...rb];
-  const maiorPrev = todos.length ? todos.reduce((a,b) => a.valor_total > b.valor_total ? a : b) : null;
-  const emAprov = todos.filter(x => /aprova[cç][aã]o/i.test(x.status || '')).length;
-
-  // Datas
-  const now = new Date();
-  const tz = -now.getTimezoneOffset() * 60000;
-  const iso = new Date(now - (-tz)).toISOString().slice(0, -1) +
-              (now.getTimezoneOffset() <= 0 ? '+' : '-') +
-              String(Math.abs(Math.floor(now.getTimezoneOffset()/60))).padStart(2,'0') + ':' +
-              String(Math.abs(now.getTimezoneOffset() % 60)).padStart(2,'0');
-
-  const dataHoje = now.toISOString().slice(0,10);
-  const vencs = todos.map(x => x.vencimento).filter(Boolean);
-  const dataAmanha = vencs.length ? vencs.sort().slice(-1)[0] : null;
-
-  return {
-    meta: {
-      generated_at: iso,
-      data_hoje: dataHoje,
-      data_amanha: dataAmanha,
-    },
-    pago_hoje: {
-      total: Math.round(totalPago * 100) / 100,
-      quantidade: pagos.length,
-      por_tipo: Object.fromEntries(Object.entries(porTipo).map(([k,v]) => [k, Math.round(v*100)/100])),
-      maior: maiorPago ? { fornecedor: maiorPago.fornecedor, valor: maiorPago.valor_rs, historico: maiorPago.historico } : null,
-      titulos: pagos,
-    },
-    previsto_amanha: {
-      total: Math.round(totPrev * 100) / 100,
-      quantidade: todos.length,
-      por_categoria: {
-        nf_servico: { total: Math.round(totNS*100)/100, quantidade: ns.length },
-        nf_titulo:  { total: Math.round(totNT*100)/100, quantidade: nt.length },
-        reembolso:  { total: Math.round(totRB*100)/100, quantidade: rb.length },
-      },
-      em_aprovacao: emAprov,
-      maior: maiorPrev ? { fornecedor: maiorPrev.fornecedor, valor: maiorPrev.valor_total } : null,
-      nf_servico: ns,
-      nf_titulo: nt,
-      reembolso: rb,
-    },
-  };
-}
-
-/* ============================================================
-   UI
-   ============================================================ */
-
-const state = {
-  files: [],       // [{file, tipo, count, ok, err}]
-  data: null,
+const CONFIG = {
+    DATA_URL: 'data.json',
+    DEBOUNCE_MS: 250,
+    RETRY_COUNT: 3
 };
 
-const el = id => document.getElementById(id);
-const fmtBR = n => n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-const tipoLabels = {
-  protheus:   ['Pagamentos realizados (Protheus)', 'protheus'],
-  nf_servico: ['NFs de Serviço (prévia)', 'nf_servico'],
-  nf_titulo:  ['NFs de Título (prévia)', 'nf_titulo'],
-  reembolso:  ['Reembolsos e Despesas (prévia)', 'reembolso'],
-  desconhecido: ['Não reconhecido', 'err'],
+// ==========================================
+// UTILS & DOM HELPER (Anti-XSS)
+// ==========================================
+const DOM = {
+    get: id => document.getElementById(id),
+    el: (tag, attributes = {}, children = []) => {
+        const element = document.createElement(tag);
+        for (const [key, value] of Object.entries(attributes)) {
+            if (key.startsWith('data-') || key.startsWith('aria-')) element.setAttribute(key, value);
+            else if (key === 'className') element.className = value;
+            else if (key === 'textContent') element.textContent = value;
+            else if (key === 'innerHTML') element.innerHTML = value; // Estrito apenas para ícones fixos
+            else element[key] = value;
+        }
+        if (children) {
+            children.forEach(child => {
+                if (typeof child === 'string') element.appendChild(document.createTextNode(child));
+                else if (child instanceof Node) element.appendChild(child);
+            });
+        }
+        return element;
+    }
 };
 
-function toast(msg) {
-  const t = el('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2200);
-}
+const Utils = {
+    fmtBR: n => (n || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+    fmtBRNoDecimals: n => (n || 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 }),
+    fmtDate: iso => {
+        if (!iso) return '—';
+        const d = new Date(iso + (iso.length === 10 ? 'T00:00:00' : ''));
+        return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+    },
+    fmtDateTime: iso => {
+        if (!iso) return '—';
+        const d = new Date(iso);
+        return d.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' }) + ' · ' +
+               d.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+    },
+    truncate: (s, n) => s.length > n ? s.slice(0, n-1) + '…' : s,
+    debounce: (fn, ms = CONFIG.DEBOUNCE_MS) => {
+        let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
+    },
+    pillClass: (tipo) => ({ NF: 'nf', BOL: 'bol', RD: 'rd' })[tipo] || ''
+};
 
-async function processFiles(files) {
-  for (const f of files) {
-    const tipo = await detectType(f);
-    const entry = { file: f, tipo, count: 0, ok: tipo !== 'desconhecido', err: null };
-    try {
-      if (tipo === 'protheus')   state.store = state.store || {}, state.store.protheus   = await parseProtheus(f);
-      else if (tipo === 'nf_servico') state.store = state.store || {}, state.store.nf_servico = await parseNFServico(f);
-      else if (tipo === 'nf_titulo')  state.store = state.store || {}, state.store.nf_titulo  = await parseNFTitulo(f);
-      else if (tipo === 'reembolso')  state.store = state.store || {}, state.store.reembolso  = await parseReembolso(f);
-      const arr = state.store && state.store[tipo];
-      entry.count = Array.isArray(arr) ? arr.length : 0;
-    } catch (e) {
-      entry.ok = false;
-      entry.err = e.message || String(e);
+// ==========================================
+// DATA SERVICE
+// ==========================================
+const DataService = {
+    data: null,
+    async fetchWithRetry(url, retries = CONFIG.RETRY_COUNT) {
+        for (let i = 0; i < retries; i++) {
+            try {
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                return await res.json();
+            } catch (err) {
+                if (i === retries - 1) throw err;
+                await new Promise(r => setTimeout(r, 1000 * (i + 1))); 
+            }
+        }
     }
-    // Substituir arquivo do mesmo tipo, se já existe
-    state.files = state.files.filter(x => x.tipo !== tipo || tipo === 'desconhecido');
-    state.files.push(entry);
-  }
-  render();
-}
+};
 
-function render() {
-  // Garantir store
-  state.store = state.store || { protheus: [], nf_servico: [], nf_titulo: [], reembolso: [] };
-  ['protheus','nf_servico','nf_titulo','reembolso'].forEach(k => state.store[k] = state.store[k] || []);
+// ==========================================
+// MÓDULOS DE UI
+// ==========================================
+const UI_Dashboard = {
+    updateStamp() {
+        const stamp = DOM.get('stamp');
+        const text = DOM.get('stamp-text');
+        if (!DataService.data) {
+            stamp.className = 'sidebar-stamp error'; text.textContent = 'sem dados'; return;
+        }
+        const gen = new Date(DataService.data.meta.generated_at);
+        const hoursAgo = (Date.now() - gen.getTime()) / 36e5;
+        if (hoursAgo > 30) {
+            stamp.className = 'sidebar-stamp stale'; text.textContent = `dados antigos`;
+        } else {
+            stamp.className = 'sidebar-stamp'; text.textContent = `atualizado às ${Utils.fmtDateTime(DataService.data.meta.generated_at).split('·')[1].trim()}`;
+        }
+    },
 
-  const hasAny = state.files.length > 0;
-  el('detected-wrap').style.display = hasAny ? 'block' : 'none';
-  if (!hasAny) return;
+    renderAlerts() {
+        const container = DOM.get('alerts-container');
+        container.innerHTML = '';
+        
+        const d = DataService.data;
+        const prev = d.previsto_amanha;
+        const hoje = d.pago_hoje;
+        const alertList = [];
+        
+        if (prev.em_aprovacao > 0) {
+            alertList.push(DOM.el('div', { className: 'alert warn' }, [
+                DOM.el('div', { className: 'alert-icon', textContent: '!' }),
+                DOM.el('div', {}, [
+                    DOM.el('strong', { textContent: `${prev.em_aprovacao} títulos pendentes de aprovação` })
+                ])
+            ]));
+        }
 
-  // Lista de arquivos
-  const list = el('file-list');
-  list.innerHTML = '';
-  const ordem = { protheus: 0, nf_servico: 1, nf_titulo: 2, reembolso: 3, desconhecido: 9 };
-  const sorted = [...state.files].sort((a,b) => (ordem[a.tipo]||99) - (ordem[b.tipo]||99));
-  for (const e of sorted) {
-    const [label, cls] = tipoLabels[e.tipo];
-    const row = document.createElement('li');
-    row.className = 'file-row';
-    row.innerHTML = `
-      <div class="file-icon ${e.ok ? 'ok' : 'err'}">${e.ok ? '✓' : '!'}</div>
-      <div>
-        <div class="file-name">${e.file.name}</div>
-        <div class="file-meta">${(e.file.size/1024).toFixed(1)} KB · ${e.err ? 'Erro: ' + e.err : 'processado em memória'}</div>
-      </div>
-      <span class="badge ${cls}">${label}</span>
-      <span class="file-count">${e.count.toLocaleString('pt-BR')} registros</span>
-    `;
-    list.appendChild(row);
-  }
+        if (prev.total > hoje.total * 1.5 && hoje.total > 0) {
+            const mult = (prev.total / hoje.total).toFixed(1);
+            alertList.push(DOM.el('div', { className: 'alert info' }, [
+                DOM.el('div', { className: 'alert-icon', textContent: '↑' }),
+                DOM.el('div', {}, [
+                    DOM.el('strong', { textContent: `Prévia de amanhã ${mult}× maior que hoje` })
+                ])
+            ]));
+        }
 
-  // Contador
-  const reconhecidos = state.files.filter(f => f.ok).length;
-  el('counter').textContent = `${reconhecidos}/${state.files.length} reconhecidos`;
+        const forns = prev.nf_servico.concat(prev.nf_titulo, prev.reembolso).map(x => (x.fornecedor || '').toUpperCase()).filter(Boolean);
+        const setHoje = new Set(hoje.titulos.map(t => (t.fornecedor || '').toUpperCase()).filter(Boolean));
+        const recorrentes = [...new Set(forns.filter(f => setHoje.has(f)))];
 
-  // Agregação
-  state.data = agregar(state.store);
-  el('sum-pago-val').innerHTML = `R$ <em>${fmtBR(state.data.pago_hoje.total)}</em>`;
-  el('sum-pago-qtd').textContent = `${state.data.pago_hoje.quantidade} títulos · ${state.data.meta.data_hoje || '—'}`;
-  el('sum-prev-val').innerHTML = `R$ <em>${fmtBR(state.data.previsto_amanha.total)}</em>`;
-  el('sum-prev-qtd').textContent = `${state.data.previsto_amanha.quantidade} títulos · ${state.data.meta.data_amanha || '—'}`;
+        if (recorrentes.length) {
+            const labelStr = `${recorrentes.length} fornecedor${recorrentes.length>1?'es':''} recorrente${recorrentes.length>1?'s':''}`;
+            alertList.push(DOM.el('div', { className: 'alert ok' }, [
+                DOM.el('div', { className: 'alert-icon', textContent: '↻' }),
+                DOM.el('div', {}, [
+                    DOM.el('strong', { textContent: labelStr })
+                ])
+            ]));
+        }
 
-  // Download habilita quando tem pelo menos 1 tipo ok
-  const podeBaixar = reconhecidos > 0;
-  el('btn-download').disabled = !podeBaixar;
-  el('hint').textContent = podeBaixar
-    ? (reconhecidos < 4 ? `Faltam tipos: ${['protheus','nf_servico','nf_titulo','reembolso'].filter(k => !state.store[k].length).join(', ') || '—'}` : 'Tudo pronto. Pode baixar.')
-    : 'Processe pelo menos 1 arquivo para baixar';
-}
+        if (alertList.length) {
+            const wrap = DOM.el('div', { className: 'alerts' });
+            alertList.forEach(a => wrap.appendChild(a));
+            container.appendChild(wrap);
+        }
+    },
 
-function download() {
-  if (!state.data) return;
-  const blob = new Blob([JSON.stringify(state.data, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'data.json';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  toast('data.json baixado ✓');
-}
+    renderKPIs() {
+        const d = DataService.data;
+        const prev = d.previsto_amanha;
+        const hoje = d.pago_hoje;
+        const container = DOM.get('kpis-container');
+        container.innerHTML = '';
+        
+        const b1 = DOM.el('div', { className: 'kpi accent' }, [
+            DOM.el('p', { className: 'kpi-label', textContent: 'Pago hoje' }),
+            DOM.el('div', { className: 'kpi-value' }, [DOM.el('span', { className: 'prefix', textContent: 'R$' }), DOM.el('em', { textContent: Utils.fmtBRNoDecimals(hoje.total) })]),
+            DOM.el('p', { className: 'kpi-sub', textContent: `${hoje.quantidade} títulos · ${Utils.fmtDate(d.meta.data_hoje)}` })
+        ]);
 
-function reset() {
-  state.files = [];
-  state.store = null;
-  state.data = null;
-  render();
-  el('file-input').value = '';
-  toast('Limpado.');
-}
+        const b2 = DOM.el('div', { className: 'kpi' }, [
+            DOM.el('p', { className: 'kpi-label', textContent: 'Previsto amanhã' }),
+            DOM.el('div', { className: 'kpi-value' }, [DOM.el('span', { className: 'prefix', textContent: 'R$' }), document.createTextNode(Utils.fmtBRNoDecimals(prev.total))]),
+            DOM.el('p', { className: 'kpi-sub', textContent: `${prev.quantidade} títulos · ${Utils.fmtDate(d.meta.data_amanha)}` })
+        ]);
 
-/* Events */
-const dz = el('dz');
-const input = el('file-input');
-el('btn-pick').addEventListener('click', e => { e.stopPropagation(); input.click(); });
-dz.addEventListener('click', () => input.click());
-dz.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') input.click(); });
-input.addEventListener('change', e => processFiles([...e.target.files]));
+        const mForn = hoje.maior?.fornecedor || '—';
+        const b3 = DOM.el('div', { className: 'kpi' }, [
+            DOM.el('p', { className: 'kpi-label', textContent: 'Maior pagamento hoje' }),
+            DOM.el('div', { className: 'kpi-value' }, [DOM.el('span', { className: 'prefix', textContent: 'R$' }), document.createTextNode(Utils.fmtBRNoDecimals(hoje.maior?.valor || 0))]),
+            DOM.el('p', { className: 'kpi-sub', title: mForn, textContent: Utils.truncate(mForn, 32) })
+        ]);
 
-['dragenter', 'dragover'].forEach(ev => dz.addEventListener(ev, e => {
-  e.preventDefault(); e.stopPropagation(); dz.classList.add('drag');
-}));
-['dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, e => {
-  e.preventDefault(); e.stopPropagation(); dz.classList.remove('drag');
-}));
-dz.addEventListener('drop', e => processFiles([...e.dataTransfer.files]));
+        const b4 = DOM.el('div', { className: 'kpi' }, [
+            DOM.el('p', { className: 'kpi-label', textContent: 'Pendentes de aprovação' }),
+            DOM.el('div', { className: 'kpi-value', textContent: prev.em_aprovacao }),
+            DOM.el('p', { className: 'kpi-sub' }, [DOM.el('span', { className: 'kpi-chip', textContent: 'risco' }), document.createTextNode(` dos ${prev.quantidade} previstos`)])
+        ]);
 
-el('btn-download').addEventListener('click', download);
-el('btn-reset').addEventListener('click', reset);
+        container.appendChild(DOM.el('div', { className: 'kpi-grid' }, [b1, b2, b3, b4]));
+    }
+};
+
+const UI_Hoje = {
+    state: { filter: { q: '', tipo: null }, sort: { col: 'valor_rs', dir: -1 } },
+    
+    cols: [
+        { key: 'tipo', label: 'Tipo', center: true, render: t => DOM.el('span', { className: `pill ${Utils.pillClass(t.tipo)}`, textContent: t.tipo||'?' }) },
+        { key: 'numero', label: 'Título', render: t => t.numero + (t.parcela ? '·'+t.parcela : '') },
+        { key: 'fornecedor', label: 'Fornecedor', render: t => DOM.el('div', {}, [DOM.el('div', { textContent: t.fornecedor||'—' }), DOM.el('div', { className: 'hist', textContent: t.historico||'' })]) },
+        { key: 'valor_rs', label: 'Valor', render: t => `R$ ${Utils.fmtBR(t.valor_rs)}`, num: true, strong: true, center: true }
+    ],
+
+    render() {
+        const sec = DOM.get('pagamentos-realizados');
+        sec.innerHTML = '';
+        
+        const hoje = DataService.data.pago_hoje;
+        const tipos = [...new Set(hoje.titulos.map(t => t.tipo).filter(Boolean))].sort();
+
+        sec.appendChild(DOM.el('div', { className: 'section-head' }, [
+            DOM.el('div', { style: 'width: 100%' }, [
+                DOM.el('h2', { className: 'section-title', innerHTML: `<i class="ph-fill ph-check-circle"></i> Pagamentos Realizados <span class="date">${Utils.fmtDate(DataService.data.meta.data_hoje)}</span>` })
+            ])
+        ]));
+
+        const card = DOM.el('div', { className: 'card' });
+        
+        const toolbar = DOM.el('div', { className: 'toolbar' });
+        const searchInput = DOM.el('input', { id: 'hoje-search', placeholder: 'Buscar fornecedor, histórico, título...' });
+        searchInput.addEventListener('input', Utils.debounce(e => { this.state.filter.q = e.target.value; this.refresh(sec); }));
+        toolbar.appendChild(DOM.el('div', { className: 'search' }, [searchInput]));
+
+        const btnAll = DOM.el('button', { className: 'filter-chip active', 'data-tipo': '', textContent: 'Todos' });
+        toolbar.appendChild(btnAll);
+        
+        tipos.forEach(t => {
+            const btn = DOM.el('button', { className: 'filter-chip', 'data-tipo': t }, [
+                DOM.el('span', { className: `pill ${Utils.pillClass(t)}`, textContent: t })
+            ]);
+            toolbar.appendChild(btn);
+        });
+
+        toolbar.appendChild(DOM.el('span', { className: 'toolbar-right', innerHTML: `Mostrando <strong id="hoje-count">0</strong> · <strong id="hoje-total">R$ 0,00</strong>` }));
+        card.appendChild(toolbar);
+
+        const tableWrap = DOM.el('div', { className: 'table-wrap' });
+        const thead = DOM.el('thead');
+        const trHead = DOM.el('tr');
+        
+        this.cols.forEach(c => {
+            const th = DOM.el('th', { 'data-key': c.key, className: `${c.num ? 'num' : ''} ${c.center ? 'center' : ''}`.trim() });
+            th.textContent = c.label;
+            trHead.appendChild(th);
+        });
+        thead.appendChild(trHead);
+
+        const tbody = DOM.el('tbody');
+        const tfoot = DOM.el('tfoot', { className: 'data' });
+        tableWrap.appendChild(DOM.el('table', { className: 'data', id: 'hoje-table' }, [thead, tbody, tfoot]));
+        card.appendChild(tableWrap);
+        sec.appendChild(card);
+
+        sec.addEventListener('click', e => {
+            const fc = e.target.closest('.filter-chip');
+            if (fc) {
+                sec.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+                fc.classList.add('active');
+                this.state.filter.tipo = fc.getAttribute('data-tipo') || null;
+                this.refresh(sec);
+            }
+            const th = e.target.closest('thead th');
+            if (th) {
+                const k = th.getAttribute('data-key');
+                if (this.state.sort.col === k) this.state.sort.dir *= -1;
+                else { this.state.sort.col = k; this.state.sort.dir = 1; }
+                this.refresh(sec);
+            }
+        });
+
+        this.refresh(sec);
+    },
+
+    refresh(sec) {
+        const hoje = DataService.data.pago_hoje;
+        let rows = hoje.titulos.filter(t => {
+            if (this.state.filter.tipo && t.tipo !== this.state.filter.tipo) return false;
+            if (this.state.filter.q) {
+                const q = this.state.filter.q.toLowerCase();
+                const blob = (t.fornecedor + ' ' + t.historico + ' ' + t.numero + ' ' + t.natureza).toLowerCase();
+                if (!blob.includes(q)) return false;
+            }
+            return true;
+        });
+
+        const { col, dir } = this.state.sort;
+        rows.sort((a, b) => {
+            let va = a[col], vb = b[col];
+            if (typeof va === 'number') return (va - vb) * dir;
+            return String(va||'').localeCompare(String(vb||''), 'pt-BR') * dir;
+        });
+
+        const tbody = sec.querySelector('tbody');
+        tbody.innerHTML = '';
+
+        if (rows.length === 0) {
+            tbody.appendChild(DOM.el('tr', {}, [DOM.el('td', { colSpan: this.cols.length, style: 'text-align:center;padding:32px;color:var(--text-3)', textContent: 'Nenhum resultado' })]));
+        } else {
+            const frag = document.createDocumentFragment();
+            rows.forEach(t => {
+                const tr = DOM.el('tr');
+                this.cols.forEach(c => {
+                    const td = DOM.el('td', { className: `${c.num ? 'num' : ''} ${c.strong ? 'strong' : ''} ${c.center ? 'center' : ''}`.trim() });
+                    const content = c.render(t);
+                    if (Array.isArray(content)) content.forEach(n => td.appendChild(n));
+                    else if (content instanceof Node) td.appendChild(content);
+                    else td.textContent = content;
+                    tr.appendChild(td);
+                });
+                frag.appendChild(tr);
+            });
+            tbody.appendChild(frag);
+        }
+
+        const total = rows.reduce((s, t) => s + (t.valor_rs || 0), 0);
+        sec.querySelector('#hoje-count').textContent = rows.length;
+        sec.querySelector('#hoje-total').textContent = 'R$ ' + Utils.fmtBR(total);
+
+        const tfoot = sec.querySelector('tfoot');
+        tfoot.innerHTML = '';
+        tfoot.appendChild(DOM.el('tr', {}, [
+            DOM.el('td', { colSpan: this.cols.length - 1, textContent: `Total exibido (${rows.length} de ${hoje.titulos.length})` }),
+            DOM.el('td', { className: 'num center', textContent: `R$ ${Utils.fmtBR(total)}` })
+        ]));
+
+        sec.querySelectorAll('thead th').forEach(th => {
+            const isSorted = th.getAttribute('data-key') === col;
+            th.classList.toggle('sorted', isSorted);
+            if (isSorted) th.setAttribute('data-dir', dir > 0 ? '↑' : '↓');
+            else th.removeAttribute('data-dir');
+        });
+    }
+};
+
+const UI_Previsto = {
+    state: { filter: { q: '' }, sort: { col: 'valor_total', dir: -1 }, activeCat: null },
+    
+    colsBy: {
+        nf_servico: [
+            { key: 'numero_nf', label: 'NF', render: r => r.numero_nf || '—' },
+            { key: 'fornecedor', label: 'Fornecedor', render: r => DOM.el('div', {}, [DOM.el('div', { textContent: r.fornecedor || '—' }), DOM.el('div', { className: 'hist', textContent: r.observacoes ? Utils.truncate(r.observacoes, 64) : '' })]) },
+            { key: 'aprovador', label: 'Aprovador', render: r => r.aprovador || '—' },
+            { key: 'status', label: 'Status', render: r => UI_Previsto.renderStatus(r.status) },
+            { key: 'valor_total', label: 'Valor', render: r => `R$ ${Utils.fmtBR(r.valor_total)}`, num: true, strong: true, center: true }
+        ],
+        nf_titulo: [
+            { key: 'numero_titulo', label: 'Título', render: r => r.numero_titulo || '—' },
+            { key: 'fornecedor', label: 'Fornecedor', render: r => DOM.el('div', {}, [DOM.el('div', { textContent: r.fornecedor || '—' }), DOM.el('div', { className: 'hist', textContent: r.historico || '' })]) },
+            { key: 'aprovador', label: 'Aprovador', render: r => r.aprovador || '—' },
+            { key: 'status', label: 'Status', render: r => UI_Previsto.renderStatus(r.status) },
+            { key: 'valor_total', label: 'Valor', render: r => `R$ ${Utils.fmtBR(r.valor_total)}`, num: true, strong: true, center: true }
+        ],
+        reembolso: [
+            { key: 'solicitante', label: 'Solicitante', render: r => r.solicitante || '—' },
+            { key: 'tipo_despesa', label: 'Tipo despesa', render: r => DOM.el('span', { className: 'pill', textContent: r.tipo_despesa || '—' }) },
+            { key: 'fornecedor', label: 'Beneficiário', render: r => r.fornecedor || '—' },
+            { key: 'tipo_solicitacao', label: 'Solicitação', render: r => r.tipo_solicitacao || '—' },
+            { key: 'aprovador', label: 'Aprovador', render: r => r.aprovador || '—' },
+            { key: 'valor_total', label: 'Valor', render: r => `R$ ${Utils.fmtBR(r.valor_total)}`, num: true, strong: true, center: true }
+        ]
+    },
+
+    renderStatus(s) {
+        if (!s) return DOM.el('span', { className: 'pill', textContent: '—' });
+        const l = s.toLowerCase();
+        if (/aprova[cç][aã]o/.test(l)) return DOM.el('span', { className: 'pill warn', textContent: s });
+        if (/aguardando|baixa/.test(l)) return DOM.el('span', { className: 'pill ok', textContent: s });
+        return DOM.el('span', { className: 'pill', textContent: s });
+    },
+
+    render() {
+        const sec = DOM.get('previa-pagamentos');
+        sec.innerHTML = '';
+        
+        const prev = DataService.data.previsto_amanha;
+        const meta = DataService.data.meta;
+
+        this.cats = [
+            { key: 'nf_servico', label: 'NFs de Serviço', data: prev.nf_servico },
+            { key: 'nf_titulo', label: 'NFs de Título', data: prev.nf_titulo },
+            { key: 'reembolso', label: 'Reembolsos', data: prev.reembolso },
+        ];
+
+        this.state.activeCat = this.cats.reduce((a, b) => a.data.length >= b.data.length ? a : b).key;
+
+        sec.appendChild(DOM.el('div', { className: 'section-head' }, [
+            DOM.el('div', { style: 'width: 100%' }, [
+                DOM.el('h2', { className: 'section-title', innerHTML: `<i class="ph-fill ph-calendar-blank"></i> Prévia de Pagamentos <span class="date">${Utils.fmtDate(meta.data_amanha)}</span>` })
+            ])
+        ]));
+
+        const card = DOM.el('div', { className: 'card' });
+
+        const catSum = DOM.el('div', { className: 'cat-summary' });
+        this.cats.forEach(c => {
+            const active = c.key === this.state.activeCat ? 'active' : '';
+            catSum.appendChild(DOM.el('div', { className: `cat-item ${active}`, 'data-cat': c.key }, [
+                DOM.el('p', { className: 'cat-label', textContent: c.label }),
+                DOM.el('div', { className: 'cat-value', textContent: `R$ ${Utils.fmtBR(prev.por_categoria[c.key].total)}` }),
+                DOM.el('p', { className: 'cat-sub', textContent: `${prev.por_categoria[c.key].quantidade} títulos` })
+            ]));
+        });
+        card.appendChild(catSum);
+
+        const tabs = DOM.el('div', { className: 'tabs' });
+        this.cats.forEach(c => {
+            const active = c.key === this.state.activeCat ? 'active' : '';
+            tabs.appendChild(DOM.el('button', { className: `tab ${active}`, 'data-cat': c.key }, [
+                document.createTextNode(`${c.label} `),
+                DOM.el('span', { className: 'tab-count', textContent: c.data.length })
+            ]));
+        });
+        card.appendChild(tabs);
+
+        const toolbar = DOM.el('div', { className: 'toolbar' });
+        const input = DOM.el('input', { id: 'prev-search', placeholder: 'Buscar fornecedor, solicitante, aprovador...' });
+        input.addEventListener('input', Utils.debounce(e => { this.state.filter.q = e.target.value; this.refresh(sec); }));
+        toolbar.appendChild(DOM.el('div', { className: 'search' }, [input]));
+        toolbar.appendChild(DOM.el('span', { className: 'toolbar-right', innerHTML: `Mostrando <strong id="prev-count">0</strong> · <strong id="prev-total">R$ 0,00</strong>` }));
+        card.appendChild(toolbar);
+
+        const tableWrap = DOM.el('div', { className: 'table-wrap' });
+        tableWrap.appendChild(DOM.el('table', { className: 'data', id: 'prev-table' }, [
+            DOM.el('thead'), DOM.el('tbody'), DOM.el('tfoot', { className: 'data' })
+        ]));
+        card.appendChild(tableWrap);
+
+        sec.appendChild(card);
+
+        sec.addEventListener('click', e => {
+            const btnCat = e.target.closest('.tab') || e.target.closest('.cat-item');
+            if (btnCat) {
+                this.state.activeCat = btnCat.getAttribute('data-cat');
+                sec.querySelectorAll('.tab, .cat-item').forEach(t => t.classList.toggle('active', t.getAttribute('data-cat') === this.state.activeCat));
+                this.state.sort = { col: 'valor_total', dir: -1 };
+                this.refresh(sec);
+            }
+            
+            const th = e.target.closest('thead th');
+            if (th) {
+                const k = th.getAttribute('data-key');
+                if (this.state.sort.col === k) this.state.sort.dir *= -1; 
+                else { this.state.sort.col = k; this.state.sort.dir = 1; }
+                this.refresh(sec);
+            }
+        });
+
+        this.refresh(sec);
+    },
+
+    refresh(sec) {
+        const cat = this.cats.find(c => c.key === this.state.activeCat);
+        const cols = this.colsBy[this.state.activeCat];
+        
+        let rows = cat.data.filter(r => {
+            if (!this.state.filter.q) return true;
+            const q = this.state.filter.q.toLowerCase();
+            return JSON.stringify(r).toLowerCase().includes(q);
+        });
+
+        const { col, dir } = this.state.sort;
+        const validCol = cols.find(c => c.key === col) ? col : cols[cols.length-1].key;
+        
+        rows.sort((a, b) => {
+            let va = a[validCol], vb = b[validCol];
+            if (typeof va === 'number' || typeof vb === 'number') return ((va||0) - (vb||0)) * dir;
+            return String(va||'').localeCompare(String(vb||''), 'pt-BR') * dir;
+        });
+
+        const thead = sec.querySelector('thead');
+        thead.innerHTML = '';
+        const trHead = DOM.el('tr');
+        cols.forEach(c => {
+            const th = DOM.el('th', { 'data-key': c.key, className: `${c.num?'num':''} ${c.center?'center':''} ${c.key===validCol?'sorted':''}`.trim() });
+            th.textContent = c.label;
+            if (c.key === validCol) th.setAttribute('data-dir', dir > 0 ? '↑' : '↓');
+            trHead.appendChild(th);
+        });
+        thead.appendChild(trHead);
+
+        const tbody = sec.querySelector('tbody');
+        tbody.innerHTML = '';
+
+        if (rows.length === 0) {
+            tbody.appendChild(DOM.el('tr', {}, [DOM.el('td', { colSpan: cols.length, style: 'text-align:center;padding:32px;color:var(--text-3)', textContent: `Nenhum título ${cat.label.toLowerCase()} previsto` })]));
+        } else {
+            const frag = document.createDocumentFragment();
+            rows.forEach(r => {
+                const risk = /aprova[cç][aã]o/i.test(r.status || '');
+                const tr = DOM.el('tr', { className: risk ? 'flag-approval' : '' });
+                cols.forEach(c => {
+                    const td = DOM.el('td', { className: `${c.num ? 'num' : ''} ${c.strong ? 'strong' : ''} ${c.center ? 'center' : ''}`.trim() });
+                    const content = c.render(r);
+                    if (Array.isArray(content)) content.forEach(n => td.appendChild(n));
+                    else if (content instanceof Node) td.appendChild(content);
+                    else td.textContent = content;
+                    tr.appendChild(td);
+                });
+                frag.appendChild(tr);
+            });
+            tbody.appendChild(frag);
+        }
+
+        const total = rows.reduce((s, r) => s + (r.valor_total || 0), 0);
+        sec.querySelector('#prev-count').textContent = rows.length;
+        sec.querySelector('#prev-total').textContent = 'R$ ' + Utils.fmtBR(total);
+        
+        const tfoot = sec.querySelector('tfoot');
+        tfoot.innerHTML = '';
+        tfoot.appendChild(DOM.el('tr', {}, [
+            DOM.el('td', { colSpan: cols.length - 1, textContent: `Total exibido (${rows.length} de ${cat.data.length})` }),
+            DOM.el('td', { className: 'num center', textContent: `R$ ${Utils.fmtBR(total)}` })
+        ]));
+    }
+};
+
+// ==========================================
+// APP INIT E EVENTOS DE ROTEAMENTO
+// ==========================================
+const App = {
+    async init() {
+        this.setupEventListeners();
+
+        try {
+            const data = await DataService.fetchWithRetry(`${CONFIG.DATA_URL}?v=${Date.now()}`);
+            DataService.data = data;
+            
+            DOM.get('loader').style.display = 'none';
+            DOM.get('app-content').style.display = 'flex';
+
+            UI_Dashboard.updateStamp();
+            UI_Dashboard.renderHero();
+            UI_Dashboard.renderAlerts();
+            UI_Dashboard.renderKPIs();
+            UI_Hoje.render();
+            UI_Previsto.render();
+            
+            this.initScrollSpy();
+
+        } catch (e) {
+            this.renderError(`Falha ao carregar data.json. Retorno: ${e.message}`);
+        }
+    },
+
+    setupEventListeners() {
+        document.addEventListener('click', e => {
+            const btn = e.target.closest('[data-action]');
+            if (!btn) return;
+            
+            const action = btn.getAttribute('data-action');
+            if (action === 'toggleSidebar') {
+                DOM.get('sidebar').classList.toggle('open');
+                DOM.get('sidebarOverlay').classList.toggle('visible');
+            } 
+            else if (action === 'scrollTo') {
+                const targetId = btn.getAttribute('data-target');
+                const el = DOM.get(targetId);
+                const ct = DOM.get('scroll-container');
+                const hd = DOM.get('main-header');
+                if (el && ct && hd) ct.scrollTo({ top: el.offsetTop - hd.offsetHeight - 20, behavior: 'smooth' });
+                
+                if (window.innerWidth <= 1024) {
+                    DOM.get('sidebar').classList.remove('open');
+                    DOM.get('sidebarOverlay').classList.remove('visible');
+                }
+            }
+        });
+
+        const btnVoltar = document.querySelector('.back-link');
+        const ref = document.referrer;
+        if (btnVoltar && (!ref || !ref.includes(window.location.hostname))) {
+            btnVoltar.style.display = 'none';
+        }
+    },
+
+    initScrollSpy() {
+        const ct = DOM.get('scroll-container');
+        const hd = DOM.get('main-header');
+        const secs = document.querySelectorAll('.scroll-section');
+        const navs = document.querySelectorAll('.sidebar-nav .nav-item');
+        
+        if (!ct || !hd) return;
+        ct.addEventListener('scroll', () => {
+            const trigger = hd.getBoundingClientRect().bottom + 100;
+            let cur = '';
+            secs.forEach(s => { if (s.getBoundingClientRect().top <= trigger) cur = s.id; });
+            if (ct.scrollHeight - ct.scrollTop <= ct.clientHeight + 2) cur = secs[secs.length - 1].id;
+            navs.forEach(n => n.classList.toggle('active', n.getAttribute('data-target') === cur));
+        });
+    },
+
+    renderError(msg) {
+        const loader = DOM.get('loader');
+        loader.innerHTML = '';
+        loader.appendChild(DOM.el('div', { className: 'empty-state' }, [
+            DOM.el('h2', { textContent: 'Ainda não tem dados por aqui' }),
+            DOM.el('p', { textContent: msg }),
+            DOM.el('button', { className: 'retry-btn', textContent: 'Tentar Novamente', onclick: () => location.reload() })
+        ]));
+
+        const stamp = DOM.get('stamp');
+        stamp.className = 'sidebar-stamp error';
+        DOM.get('stamp-text').textContent = 'erro';
+    }
+};
+
+document.addEventListener('DOMContentLoaded', () => App.init());
+
 </script>
 </body>
 </html>
