@@ -155,7 +155,7 @@
         }
 
         /* ============================================================
-           KPIS (Tamanho da fonte reduzida e sem centavos)
+           KPIS
            ============================================================ */
         .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
         .kpi {
@@ -212,7 +212,7 @@
            ============================================================ */
         .toolbar { display: flex; gap: 10px; padding: 14px 24px; align-items: center; flex-wrap: wrap; }
         
-        /* Barra de pesquisa menor e mais discreta */
+        /* Barra de pesquisa menor */
         .search { flex: 0 1 280px; min-width: 200px; position: relative; }
         .search input {
             width: 100%; padding: 9px 12px 9px 36px; border: 1px solid var(--border-color); border-radius: var(--radius-sm);
@@ -226,12 +226,10 @@
             color: var(--text-2); font-family: inherit; font-size: 12.5px; font-weight: 500; cursor: pointer; transition: all 0.12s;
         }
         .filter-chip:hover { border-color: var(--orange-main); color: var(--text-1); }
-        
-        /* Correção Visual do Contraste para Pílulas Ativas */
         .filter-chip.active { background: var(--orange-main); color: white; border-color: var(--orange-main); }
         .filter-chip.active .pill { background: rgba(255,255,255,0.25); color: #ffffff !important; border-color: transparent; }
         
-        /* Maior destaque para a contagem "Mostrando..." */
+        /* Maior destaque */
         .toolbar-right { font-size: 13px; color: var(--text-1); font-weight: 500; margin-left: auto; }
         .toolbar-right strong { color: var(--orange-main); font-weight: 700; font-variant-numeric: tabular-nums; font-size: 14px;}
 
@@ -249,7 +247,7 @@
         table.data thead th.sorted { color: var(--orange-main); }
         table.data thead th.sorted::after { content: attr(data-dir); margin-left: 4px; color: var(--orange-main); }
         
-        /* Modificador de alinhamento ao centro */
+        /* Centralização */
         table.data th.center, table.data td.center { text-align: center !important; justify-content: center; }
 
         table.data tbody tr { border-bottom: 1px solid var(--border-color); transition: background 0.1s; }
@@ -424,7 +422,10 @@ const DOM = {
 
 const Utils = {
     fmtBR: n => (n || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+    
+    // Formatador sem as casas decimais para os KPIs
     fmtBRNoDecimals: n => (n || 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 }),
+
     fmtDate: iso => {
         if (!iso) return '—';
         const d = new Date(iso + (iso.length === 10 ? 'T00:00:00' : ''));
@@ -490,6 +491,7 @@ const UI_Dashboard = {
         const hoje = d.pago_hoje;
         const alertList = [];
         
+        // Alertas totalmente limpos (Apenas Strong)
         if (prev.em_aprovacao > 0) {
             alertList.push(DOM.el('div', { className: 'alert warn' }, [
                 DOM.el('div', { className: 'alert-icon', textContent: '!' }),
@@ -569,6 +571,7 @@ const UI_Dashboard = {
 const UI_Hoje = {
     state: { filter: { q: '', tipo: null }, sort: { col: 'valor_rs', dir: -1 } },
     
+    // Colunas Ajustadas (Inclusão de Tipo, Valor centralizado)
     cols: [
         { key: 'tipo', label: 'Tipo', center: true, render: t => DOM.el('span', { className: `pill ${Utils.pillClass(t.tipo)}`, textContent: t.tipo||'?' }) },
         { key: 'numero', label: 'Título', render: t => t.numero + (t.parcela ? '·'+t.parcela : '') },
@@ -583,6 +586,7 @@ const UI_Hoje = {
         const hoje = DataService.data.pago_hoje;
         const tipos = [...new Set(hoje.titulos.map(t => t.tipo).filter(Boolean))].sort();
 
+        // Cabeçalho com data destacada
         sec.appendChild(DOM.el('div', { className: 'section-head' }, [
             DOM.el('div', { style: 'width: 100%' }, [
                 DOM.el('h2', { className: 'section-title', innerHTML: `<i class="ph-fill ph-check-circle"></i> Pagamentos Realizados <span class="date">${Utils.fmtDate(DataService.data.meta.data_hoje)}</span>` })
@@ -606,6 +610,7 @@ const UI_Hoje = {
             toolbar.appendChild(btn);
         });
 
+        // Contagem Destacada
         toolbar.appendChild(DOM.el('span', { className: 'toolbar-right', innerHTML: `Mostrando <strong id="hoje-count">0</strong> · <strong id="hoje-total">R$ 0,00</strong>` }));
         card.appendChild(toolbar);
 
@@ -710,6 +715,7 @@ const UI_Hoje = {
 const UI_Previsto = {
     state: { filter: { q: '' }, sort: { col: 'valor_total', dir: -1 }, activeCat: null },
     
+    // Coluna "Empresa" Excluída. Coluna "valor_total" centralizada.
     colsBy: {
         nf_servico: [
             { key: 'numero_nf', label: 'NF', render: r => r.numero_nf || '—' },
@@ -751,9 +757,9 @@ const UI_Previsto = {
         const meta = DataService.data.meta;
 
         this.cats = [
-            { key: 'nf_servico', label: 'NFs de Serviço', data: prev.nf_servico },
-            { key: 'nf_titulo', label: 'NFs de Título', data: prev.nf_titulo },
-            { key: 'reembolso', label: 'Reembolsos', data: prev.reembolso },
+            { key: 'nf_servico', label: 'NFs de Serviço', data: prev.nf_servico || [] },
+            { key: 'nf_titulo', label: 'NFs de Título', data: prev.nf_titulo || [] },
+            { key: 'reembolso', label: 'Reembolsos', data: prev.reembolso || [] },
         ];
 
         this.state.activeCat = this.cats.reduce((a, b) => a.data.length >= b.data.length ? a : b).key;
@@ -769,10 +775,13 @@ const UI_Previsto = {
         const catSum = DOM.el('div', { className: 'cat-summary' });
         this.cats.forEach(c => {
             const active = c.key === this.state.activeCat ? 'active' : '';
+            // Proteção para o caso de objeto nulo no JSON
+            const summaryInfo = prev.por_categoria && prev.por_categoria[c.key] ? prev.por_categoria[c.key] : { total: 0, quantidade: 0 };
+            
             catSum.appendChild(DOM.el('div', { className: `cat-item ${active}`, 'data-cat': c.key }, [
                 DOM.el('p', { className: 'cat-label', textContent: c.label }),
-                DOM.el('div', { className: 'cat-value', textContent: `R$ ${Utils.fmtBR(prev.por_categoria[c.key].total)}` }),
-                DOM.el('p', { className: 'cat-sub', textContent: `${prev.por_categoria[c.key].quantidade} títulos` })
+                DOM.el('div', { className: 'cat-value', textContent: `R$ ${Utils.fmtBR(summaryInfo.total)}` }),
+                DOM.el('p', { className: 'cat-sub', textContent: `${summaryInfo.quantidade} títulos` })
             ]));
         });
         card.appendChild(catSum);
@@ -904,7 +913,6 @@ const App = {
             DOM.get('app-content').style.display = 'flex';
 
             UI_Dashboard.updateStamp();
-            UI_Dashboard.renderHero();
             UI_Dashboard.renderAlerts();
             UI_Dashboard.renderKPIs();
             UI_Hoje.render();
