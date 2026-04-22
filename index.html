@@ -1,1111 +1,992 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Pagamentos · Dashboard</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --plum: #3C003C;
-    --plum-deep: #2A0028;
-    --plum-light: #5C1A5C;
-    --orange: #FF6E00;
-    --orange-soft: #FFF1E4;
-    --orange-deep: #D25500;
-    --ink: #1A0F1A;
-    --muted: #6B5E6B;
-    --line: #E8E0E8;
-    --line-soft: #F4EFF4;
-    --surface: #FFFFFF;
-    --bg: #FAF7F5;
-    --ok: #1F7A3D;
-    --ok-soft: #EAF7EE;
-    --warn: #C77700;
-    --warn-soft: #FFF4E0;
-    --err: #B91C1C;
-    --err-soft: #FCE9E9;
-  }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
-  body {
-    font-family: 'Manrope', system-ui, sans-serif;
-    background: var(--bg);
-    color: var(--ink);
-    font-size: 14.5px;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-  }
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Pagamentos · Dashboard | ONTIME</title>
+    
+    <link rel="icon" type="image/png" href="https://controladoriaon.github.io/Controladoria/favicon.png?v=3">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ============================================================
+           CONFIGURAÇÕES E VARIÁVEIS DE TEMA
+           ============================================================ */
+        :root {
+            --plum: #3C003C;
+            --plum-deep: #2A0028;
+            --plum-light: #5C1A5C;
+            --orange: #FF6E00;
+            --orange-soft: #FFF1E4;
+            --orange-deep: #D25500;
+            --ink: #1A0F1A;
+            --muted: #6B5E6B;
+            --line: #E8E0E8;
+            --line-soft: #F4EFF4;
+            --surface: #FFFFFF;
+            --bg: #FAF7F5;
+            --ok: #1F7A3D;
+            --ok-soft: #EAF7EE;
+            --warn: #C77700;
+            --warn-soft: #FFF4E0;
+            --err: #B91C1C;
+            --err-soft: #FCE9E9;
+        }
 
-  /* ============= Header ============= */
-  header.hero {
-    background: linear-gradient(135deg, var(--plum-deep) 0%, var(--plum) 60%, var(--plum-light) 100%);
-    color: white;
-    padding: 28px 40px 56px;
-    position: relative;
-    overflow: hidden;
-  }
-  header.hero::before {
-    content: '';
-    position: absolute;
-    top: -30%;
-    right: -10%;
-    width: 500px; height: 500px;
-    background: radial-gradient(circle, rgba(255,110,0,0.18) 0%, transparent 55%);
-    pointer-events: none;
-  }
-  header.hero::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: radial-gradient(circle at 20% 100%, rgba(255,110,0,0.08) 0%, transparent 40%);
-    pointer-events: none;
-  }
-  .hero-bar {
-    max-width: 1400px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: relative;
-  }
-  .brand {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-  .brand-mark {
-    width: 44px; height: 44px;
-    border-radius: 10px;
-    background: rgba(255,255,255,0.08);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255,255,255,0.12);
-    display: grid; place-items: center;
-    color: var(--orange);
-    font-family: 'Fraunces', serif;
-    font-weight: 700;
-    font-size: 22px;
-  }
-  .brand-text h1 {
-    font-family: 'Fraunces', serif;
-    font-weight: 500;
-    font-size: 22px;
-    margin: 0;
-    letter-spacing: -0.01em;
-  }
-  .brand-text p {
-    margin: 2px 0 0;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    color: rgba(255,255,255,0.65);
-  }
-  .header-actions {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-  }
-  .stamp {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 7px 14px;
-    background: rgba(255,255,255,0.08);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 999px;
-    font-size: 12px;
-    color: rgba(255,255,255,0.85);
-  }
-  .stamp .dot {
-    width: 7px; height: 7px;
-    border-radius: 999px;
-    background: #4ade80;
-    box-shadow: 0 0 0 3px rgba(74,222,128,0.25);
-    animation: pulse 2s ease-in-out infinite;
-  }
-  .stamp.stale .dot { background: var(--orange); box-shadow: 0 0 0 3px rgba(255,110,0,0.3); }
-  .stamp.error .dot { background: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,0.3); }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-  }
-  .btn-print {
-    padding: 8px 16px;
-    background: transparent;
-    border: 1px solid rgba(255,255,255,0.2);
-    color: white;
-    border-radius: 8px;
-    font-size: 13px;
-    font-family: inherit;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .btn-print:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.3); }
+        /* ============================================================
+           RESETS E BASE
+           ============================================================ */
+        * { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; }
+        body {
+            font-family: 'Manrope', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--ink);
+            font-size: 14.5px;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
 
-  .hero-body {
-    max-width: 1400px;
-    margin: 32px auto 0;
-    position: relative;
-  }
-  .hero-title {
-    font-family: 'Fraunces', serif;
-    font-weight: 400;
-    font-size: 42px;
-    letter-spacing: -0.02em;
-    line-height: 1.1;
-    margin: 0 0 6px;
-  }
-  .hero-title em {
-    font-style: italic;
-    color: var(--orange);
-    font-weight: 500;
-  }
-  .hero-sub {
-    color: rgba(255,255,255,0.7);
-    font-size: 15px;
-    margin: 0;
-  }
+        /* ============================================================
+           HEADER (HERO)
+           ============================================================ */
+        header.hero {
+            background: linear-gradient(135deg, var(--plum-deep) 0%, var(--plum) 60%, var(--plum-light) 100%);
+            color: white;
+            padding: 28px 40px 56px;
+            position: relative;
+            overflow: hidden;
+        }
+        header.hero::before {
+            content: ''; position: absolute; top: -30%; right: -10%;
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(255,110,0,0.18) 0%, transparent 55%);
+            pointer-events: none;
+        }
+        header.hero::after {
+            content: ''; position: absolute; inset: 0;
+            background-image: radial-gradient(circle at 20% 100%, rgba(255,110,0,0.08) 0%, transparent 40%);
+            pointer-events: none;
+        }
+        
+        .hero-bar {
+            max-width: 1400px; margin: 0 auto; display: flex;
+            align-items: center; justify-content: space-between; position: relative;
+        }
+        .brand { display: flex; align-items: center; gap: 14px; }
+        .brand-mark {
+            width: 44px; height: 44px; border-radius: 10px;
+            background: transparent; border: none;
+            display: grid; place-items: center; padding: 0;
+        }
+        .brand-mark img {
+            width: 100%; height: 100%; border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.12);
+            box-shadow: 0 0 15px rgba(255,110,0,0.3);
+        }
+        .brand-text h1 {
+            font-family: 'Fraunces', serif; font-weight: 500; font-size: 22px;
+            margin: 0; letter-spacing: -0.01em;
+        }
+        .brand-text p {
+            margin: 2px 0 0; font-size: 11px; text-transform: uppercase;
+            letter-spacing: 0.14em; color: rgba(255,255,255,0.65);
+        }
 
-  /* ============= Layout ============= */
-  main {
-    max-width: 1400px;
-    margin: -32px auto 64px;
-    padding: 0 40px;
-    position: relative;
-    z-index: 1;
-  }
-  section { margin-bottom: 48px; }
-  .section-head {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    margin-bottom: 18px;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
-  .section-title {
-    font-family: 'Fraunces', serif;
-    font-weight: 500;
-    font-size: 24px;
-    letter-spacing: -0.01em;
-    margin: 0;
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
-  }
-  .section-title .date {
-    font-size: 13px;
-    color: var(--muted);
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 400;
-  }
-  .section-sub {
-    color: var(--muted);
-    font-size: 13px;
-    margin: 0;
-  }
+        .header-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap;}
+        .stamp {
+            display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px;
+            background: rgba(255,255,255,0.08); backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.12); border-radius: 999px;
+            font-size: 12px; color: rgba(255,255,255,0.85);
+        }
+        .stamp .dot {
+            width: 7px; height: 7px; border-radius: 999px; background: #4ade80;
+            box-shadow: 0 0 0 3px rgba(74,222,128,0.25); animation: pulse 2s ease-in-out infinite;
+        }
+        .stamp.stale .dot { background: var(--orange); box-shadow: 0 0 0 3px rgba(255,110,0,0.3); }
+        .stamp.error .dot { background: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,0.3); }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
 
-  /* ============= KPIs ============= */
-  .kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-  }
-  .kpi {
-    background: var(--surface);
-    border-radius: 16px;
-    padding: 22px 24px;
-    border: 1px solid var(--line);
-    position: relative;
-    overflow: hidden;
-    transition: transform 0.2s, box-shadow 0.2s;
-  }
-  .kpi:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 14px 32px -14px rgba(60,0,60,0.15);
-  }
-  .kpi.accent { background: linear-gradient(135deg, var(--plum) 0%, var(--plum-deep) 100%); color: white; border-color: transparent; }
-  .kpi.accent::before {
-    content: '';
-    position: absolute;
-    top: -40px; right: -40px;
-    width: 180px; height: 180px;
-    background: radial-gradient(circle, rgba(255,110,0,0.2) 0%, transparent 65%);
-  }
-  .kpi-label {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--muted);
-    margin: 0 0 12px;
-    font-weight: 600;
-  }
-  .kpi.accent .kpi-label { color: rgba(255,255,255,0.7); }
-  .kpi-value {
-    font-family: 'Fraunces', serif;
-    font-weight: 400;
-    font-size: 32px;
-    letter-spacing: -0.02em;
-    line-height: 1;
-    display: flex;
-    align-items: baseline;
-    gap: 4px;
-    position: relative;
-  }
-  .kpi-value .prefix {
-    font-size: 16px;
-    color: var(--muted);
-    font-weight: 400;
-  }
-  .kpi.accent .kpi-value .prefix { color: rgba(255,255,255,0.6); }
-  .kpi-value em {
-    font-style: normal;
-    color: var(--orange);
-  }
-  .kpi-sub {
-    margin: 10px 0 0;
-    font-size: 12.5px;
-    color: var(--muted);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    position: relative;
-  }
-  .kpi.accent .kpi-sub { color: rgba(255,255,255,0.75); }
-  .kpi-chip {
-    display: inline-flex;
-    align-items: center;
-    padding: 2px 8px;
-    background: var(--orange-soft);
-    color: var(--orange-deep);
-    border-radius: 999px;
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 600;
-    font-size: 11px;
-  }
+        .btn-print {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 8px 16px; background: transparent; border: 1px solid rgba(255,255,255,0.2);
+            color: white; border-radius: 8px; font-size: 13px; font-family: inherit; font-weight: 600;
+            cursor: pointer; transition: all 0.15s; text-decoration: none;
+        }
+        .btn-print:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.3); }
+        .btn-print.back-link:hover { background: var(--orange); border-color: var(--orange); color: #fff; }
 
-  /* ============= Cards wrap ============= */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 18px;
-    overflow: hidden;
-  }
-  .card-head {
-    padding: 18px 24px;
-    border-bottom: 1px solid var(--line-soft);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
-  .card-title {
-    font-family: 'Fraunces', serif;
-    font-weight: 500;
-    font-size: 17px;
-    margin: 0;
-    letter-spacing: -0.005em;
-  }
-  .card-meta {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    color: var(--muted);
-  }
+        .hero-body { max-width: 1400px; margin: 32px auto 0; position: relative; }
+        .hero-title {
+            font-family: 'Fraunces', serif; font-weight: 400; font-size: 42px;
+            letter-spacing: -0.02em; line-height: 1.1; margin: 0 0 6px;
+        }
+        .hero-title em { font-style: italic; color: var(--orange); font-weight: 500; }
+        .hero-sub { color: rgba(255,255,255,0.7); font-size: 15px; margin: 0; }
 
-  /* ============= Tabs ============= */
-  .tabs {
-    display: flex;
-    gap: 4px;
-    border-bottom: 1px solid var(--line);
-    padding: 0 24px;
-    background: linear-gradient(to bottom, rgba(60,0,60,0.015), transparent);
-  }
-  .tab {
-    padding: 14px 18px;
-    background: none;
-    border: 0;
-    border-bottom: 2px solid transparent;
-    font-family: inherit;
-    font-size: 13.5px;
-    font-weight: 600;
-    color: var(--muted);
-    cursor: pointer;
-    transition: all 0.15s;
-    margin-bottom: -1px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .tab:hover { color: var(--ink); }
-  .tab.active { color: var(--plum); border-bottom-color: var(--orange); }
-  .tab-count {
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 500;
-    font-size: 11px;
-    padding: 1px 7px;
-    background: var(--line-soft);
-    border-radius: 999px;
-    color: var(--muted);
-  }
-  .tab.active .tab-count { background: var(--orange-soft); color: var(--orange-deep); }
+        /* ============================================================
+           LAYOUT E CONTAINERS
+           ============================================================ */
+        main { max-width: 1400px; margin: -32px auto 64px; padding: 0 40px; position: relative; z-index: 1; }
+        section { margin-bottom: 48px; }
+        
+        .section-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 18px; gap: 16px; flex-wrap: wrap; }
+        .section-title {
+            font-family: 'Fraunces', serif; font-weight: 500; font-size: 24px;
+            letter-spacing: -0.01em; margin: 0; display: flex; align-items: baseline; gap: 12px;
+        }
+        .section-title .date { font-size: 13px; color: var(--muted); font-family: 'JetBrains Mono', monospace; font-weight: 400; }
+        .section-sub { color: var(--muted); font-size: 13px; margin: 0; }
 
-  /* ============= Toolbar ============= */
-  .toolbar {
-    display: flex;
-    gap: 10px;
-    padding: 14px 24px;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-  .search {
-    flex: 1;
-    min-width: 200px;
-    position: relative;
-  }
-  .search input {
-    width: 100%;
-    padding: 9px 12px 9px 36px;
-    border: 1px solid var(--line);
-    border-radius: 9px;
-    font-family: inherit;
-    font-size: 13.5px;
-    background: var(--bg);
-    transition: all 0.15s;
-  }
-  .search input:focus {
-    outline: 0;
-    border-color: var(--orange);
-    background: white;
-    box-shadow: 0 0 0 3px rgba(255,110,0,0.1);
-  }
-  .search::before {
-    content: '⌕';
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--muted);
-    font-size: 16px;
-    pointer-events: none;
-  }
-  .filter-chip {
-    padding: 7px 12px;
-    border-radius: 8px;
-    border: 1px solid var(--line);
-    background: var(--bg);
-    color: var(--muted);
-    font-family: inherit;
-    font-size: 12.5px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.12s;
-  }
-  .filter-chip:hover { border-color: var(--plum); color: var(--ink); }
-  .filter-chip.active { background: var(--plum); color: white; border-color: var(--plum); }
-  .toolbar-right {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    color: var(--muted);
-    margin-left: auto;
-  }
-  .toolbar-right strong { color: var(--plum); font-weight: 600; }
+        /* ============================================================
+           KPIS E CARDS
+           ============================================================ */
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+        .kpi {
+            background: var(--surface); border-radius: 16px; padding: 22px 24px;
+            border: 1px solid var(--line); position: relative; overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .kpi:hover { transform: translateY(-2px); box-shadow: 0 14px 32px -14px rgba(60,0,60,0.15); }
+        .kpi.accent { background: linear-gradient(135deg, var(--plum) 0%, var(--plum-deep) 100%); color: white; border-color: transparent; }
+        .kpi.accent::before {
+            content: ''; position: absolute; top: -40px; right: -40px; width: 180px; height: 180px;
+            background: radial-gradient(circle, rgba(255,110,0,0.2) 0%, transparent 65%);
+        }
+        .kpi-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin: 0 0 12px; font-weight: 600; }
+        .kpi.accent .kpi-label { color: rgba(255,255,255,0.7); }
+        
+        .kpi-value { font-family: 'Fraunces', serif; font-weight: 400; font-size: 32px; letter-spacing: -0.02em; line-height: 1; display: flex; align-items: baseline; gap: 4px; position: relative; }
+        .kpi-value .prefix { font-size: 16px; color: var(--muted); font-weight: 400; }
+        .kpi.accent .kpi-value .prefix { color: rgba(255,255,255,0.6); }
+        .kpi-value em { font-style: normal; color: var(--orange); }
+        
+        .kpi-sub { margin: 10px 0 0; font-size: 12.5px; color: var(--muted); display: flex; align-items: center; gap: 6px; position: relative; }
+        .kpi.accent .kpi-sub { color: rgba(255,255,255,0.75); }
+        .kpi-chip {
+            display: inline-flex; align-items: center; padding: 2px 8px; background: var(--orange-soft);
+            color: var(--orange-deep); border-radius: 999px; font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 11px;
+        }
 
-  /* ============= Table ============= */
-  .table-wrap { overflow-x: auto; }
-  table.data {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-  }
-  table.data thead th {
-    text-align: left;
-    padding: 11px 16px;
-    font-weight: 600;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--muted);
-    background: var(--bg);
-    border-bottom: 1px solid var(--line);
-    white-space: nowrap;
-    position: sticky;
-    top: 0;
-    cursor: pointer;
-    user-select: none;
-  }
-  table.data thead th:hover { color: var(--ink); background: var(--line-soft); }
-  table.data thead th.sorted { color: var(--plum); }
-  table.data thead th.sorted::after {
-    content: attr(data-dir);
-    margin-left: 4px;
-    color: var(--orange);
-  }
-  table.data tbody tr {
-    border-bottom: 1px solid var(--line-soft);
-    transition: background 0.1s;
-  }
-  table.data tbody tr:hover { background: rgba(255,110,0,0.03); }
-  table.data tbody tr.flag-approval { background: var(--warn-soft); }
-  table.data tbody tr.flag-approval:hover { background: #FFE8BD; }
-  table.data td {
-    padding: 11px 16px;
-    vertical-align: top;
-  }
-  table.data td.num {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12.5px;
-    text-align: right;
-    white-space: nowrap;
-    font-variant-numeric: tabular-nums;
-  }
-  table.data td.num.strong { font-weight: 600; color: var(--ink); }
-  table.data .hist { color: var(--muted); font-size: 12px; }
-  table.data td .pill {
-    display: inline-flex;
-    padding: 2px 8px;
-    border-radius: 999px;
-    font-size: 11px;
-    font-weight: 600;
-    background: var(--line-soft);
-    color: var(--muted);
-    white-space: nowrap;
-  }
-  table.data td .pill.ok { background: var(--ok-soft); color: var(--ok); }
-  table.data td .pill.warn { background: var(--warn-soft); color: var(--warn); }
-  table.data td .pill.nf { background: rgba(255,110,0,0.1); color: var(--orange-deep); }
-  table.data td .pill.bol { background: rgba(60,0,60,0.08); color: var(--plum); }
-  table.data td .pill.rd { background: rgba(31,122,61,0.1); color: var(--ok); }
+        .card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; }
+        
+        /* Categoria Panel */
+        .cat-summary {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding: 20px 24px;
+            border-bottom: 1px solid var(--line-soft); background: linear-gradient(to bottom, rgba(60,0,60,0.02), transparent);
+        }
+        .cat-item { padding: 14px 16px; border: 1px solid var(--line); border-radius: 11px; background: var(--surface); cursor: pointer; transition: all 0.2s;}
+        .cat-item.active { border-color: var(--orange); box-shadow: 0 4px 14px -6px rgba(255,110,0,0.25); }
+        .cat-item .cat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); font-weight: 600; margin: 0 0 6px; }
+        .cat-item .cat-value { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 500; line-height: 1; letter-spacing: -0.01em; }
+        .cat-item .cat-sub { margin: 4px 0 0; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); }
 
-  tfoot.data td {
-    padding: 14px 16px;
-    background: var(--bg);
-    font-weight: 600;
-    border-top: 2px solid var(--line);
-    font-size: 13px;
-  }
-  tfoot.data .num {
-    font-family: 'JetBrains Mono', monospace;
-    text-align: right;
-    color: var(--plum);
-    font-weight: 700;
-  }
+        /* ============================================================
+           TABS E FERRAMENTAS
+           ============================================================ */
+        .tabs {
+            display: flex; gap: 4px; border-bottom: 1px solid var(--line); padding: 0 24px;
+            background: linear-gradient(to bottom, rgba(60,0,60,0.015), transparent);
+        }
+        .tab {
+            padding: 14px 18px; background: none; border: 0; border-bottom: 2px solid transparent;
+            font-family: inherit; font-size: 13.5px; font-weight: 600; color: var(--muted);
+            cursor: pointer; transition: all 0.15s; margin-bottom: -1px; display: inline-flex; align-items: center; gap: 8px;
+        }
+        .tab:hover { color: var(--ink); }
+        .tab.active { color: var(--plum); border-bottom-color: var(--orange); }
+        .tab-count { font-family: 'JetBrains Mono', monospace; font-weight: 500; font-size: 11px; padding: 1px 7px; background: var(--line-soft); border-radius: 999px; color: var(--muted); }
+        .tab.active .tab-count { background: var(--orange-soft); color: var(--orange-deep); }
 
-  /* ============= Categoria panel ============= */
-  .cat-summary {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    padding: 20px 24px;
-    border-bottom: 1px solid var(--line-soft);
-    background: linear-gradient(to bottom, rgba(60,0,60,0.02), transparent);
-  }
-  .cat-item {
-    padding: 14px 16px;
-    border: 1px solid var(--line);
-    border-radius: 11px;
-    background: var(--surface);
-  }
-  .cat-item.active { border-color: var(--orange); box-shadow: 0 4px 14px -6px rgba(255,110,0,0.25); }
-  .cat-item .cat-label {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--muted);
-    font-weight: 600;
-    margin: 0 0 6px;
-  }
-  .cat-item .cat-value {
-    font-family: 'Fraunces', serif;
-    font-size: 22px;
-    font-weight: 500;
-    line-height: 1;
-    letter-spacing: -0.01em;
-  }
-  .cat-item .cat-sub {
-    margin: 4px 0 0;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: var(--muted);
-  }
+        .toolbar { display: flex; gap: 10px; padding: 14px 24px; align-items: center; flex-wrap: wrap; }
+        .search { flex: 1; min-width: 200px; position: relative; }
+        .search input {
+            width: 100%; padding: 9px 12px 9px 36px; border: 1px solid var(--line); border-radius: 9px;
+            font-family: inherit; font-size: 13.5px; background: var(--bg); transition: all 0.15s;
+        }
+        .search input:focus { outline: 0; border-color: var(--orange); background: white; box-shadow: 0 0 0 3px rgba(255,110,0,0.1); }
+        .search::before { content: '⌕'; position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 16px; pointer-events: none; }
+        
+        .filter-chip {
+            padding: 7px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg);
+            color: var(--muted); font-family: inherit; font-size: 12.5px; font-weight: 500; cursor: pointer; transition: all 0.12s;
+        }
+        .filter-chip:hover { border-color: var(--plum); color: var(--ink); }
+        .filter-chip.active { background: var(--plum); color: white; border-color: var(--plum); }
+        .toolbar-right { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); margin-left: auto; }
+        .toolbar-right strong { color: var(--plum); font-weight: 600; }
 
-  /* ============= Alertas ============= */
-  .alerts {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 12px;
-    margin-bottom: 16px;
-  }
-  .alert {
-    padding: 14px 18px;
-    border-radius: 12px;
-    font-size: 13px;
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-    border: 1px solid;
-  }
-  .alert-icon {
-    width: 28px; height: 28px;
-    border-radius: 8px;
-    display: grid; place-items: center;
-    font-weight: 700;
-    font-size: 14px;
-    flex: 0 0 28px;
-  }
-  .alert.warn { background: var(--warn-soft); border-color: #F5DFA8; color: #6B4500; }
-  .alert.warn .alert-icon { background: var(--warn); color: white; }
-  .alert.info { background: var(--orange-soft); border-color: #FBDAB8; color: #7A3600; }
-  .alert.info .alert-icon { background: var(--orange); color: white; }
-  .alert.ok { background: var(--ok-soft); border-color: #B8E0C6; color: #0F4D25; }
-  .alert.ok .alert-icon { background: var(--ok); color: white; }
-  .alert strong { font-weight: 700; }
-  .alert small { display: block; opacity: 0.75; margin-top: 2px; font-size: 11.5px; }
+        /* ============================================================
+           TABELAS E ALERTAS
+           ============================================================ */
+        .table-wrap { overflow-x: auto; }
+        table.data { width: 100%; border-collapse: collapse; font-size: 13px; }
+        table.data thead th {
+            text-align: left; padding: 11px 16px; font-weight: 600; font-size: 11px;
+            text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted);
+            background: var(--bg); border-bottom: 1px solid var(--line); white-space: nowrap;
+            position: sticky; top: 0; cursor: pointer; user-select: none;
+        }
+        table.data thead th:hover { color: var(--ink); background: var(--line-soft); }
+        table.data thead th.sorted { color: var(--plum); }
+        table.data thead th.sorted::after { content: attr(data-dir); margin-left: 4px; color: var(--orange); }
+        
+        table.data tbody tr { border-bottom: 1px solid var(--line-soft); transition: background 0.1s; }
+        table.data tbody tr:hover { background: rgba(255,110,0,0.03); }
+        table.data tbody tr.flag-approval { background: var(--warn-soft); }
+        table.data tbody tr.flag-approval:hover { background: #FFE8BD; }
+        
+        table.data td { padding: 11px 16px; vertical-align: top; }
+        table.data td.num { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+        table.data td.num.strong { font-weight: 600; color: var(--ink); }
+        table.data .hist { color: var(--muted); font-size: 12px; }
+        
+        table.data td .pill {
+            display: inline-flex; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600;
+            background: var(--line-soft); color: var(--muted); white-space: nowrap;
+        }
+        table.data td .pill.ok { background: var(--ok-soft); color: var(--ok); }
+        table.data td .pill.warn { background: var(--warn-soft); color: var(--warn); }
+        table.data td .pill.nf { background: rgba(255,110,0,0.1); color: var(--orange-deep); }
+        table.data td .pill.bol { background: rgba(60,0,60,0.08); color: var(--plum); }
+        table.data td .pill.rd { background: rgba(31,122,61,0.1); color: var(--ok); }
 
-  /* ============= Empty / Error state ============= */
-  .empty-state {
-    padding: 80px 32px;
-    text-align: center;
-    background: var(--surface);
-    border: 1px dashed var(--line);
-    border-radius: 18px;
-  }
-  .empty-state h2 {
-    font-family: 'Fraunces', serif;
-    font-weight: 500;
-    font-size: 24px;
-    margin: 0 0 10px;
-  }
-  .empty-state p { color: var(--muted); margin: 0 0 20px; max-width: 520px; margin-inline: auto; }
-  .empty-state a {
-    color: var(--orange);
-    font-weight: 600;
-    text-decoration: none;
-  }
-  .empty-state a:hover { text-decoration: underline; }
-  .empty-state code {
-    font-family: 'JetBrains Mono', monospace;
-    background: var(--line-soft);
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 0.9em;
-  }
+        tfoot.data td { padding: 14px 16px; background: var(--bg); font-weight: 600; border-top: 2px solid var(--line); font-size: 13px; }
+        tfoot.data .num { font-family: 'JetBrains Mono', monospace; text-align: right; color: var(--plum); font-weight: 700; }
 
-  /* ============= Fade-in animation ============= */
-  .reveal { animation: reveal 0.5s ease-out both; }
-  .reveal:nth-child(2) { animation-delay: 0.06s; }
-  .reveal:nth-child(3) { animation-delay: 0.12s; }
-  .reveal:nth-child(4) { animation-delay: 0.18s; }
-  @keyframes reveal {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+        /* Alertas */
+        .alerts { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-bottom: 16px; }
+        .alert { padding: 14px 18px; border-radius: 12px; font-size: 13px; display: flex; gap: 12px; align-items: flex-start; border: 1px solid; }
+        .alert-icon { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; font-weight: 700; font-size: 14px; flex: 0 0 28px; }
+        .alert.warn { background: var(--warn-soft); border-color: #F5DFA8; color: #6B4500; }
+        .alert.warn .alert-icon { background: var(--warn); color: white; }
+        .alert.info { background: var(--orange-soft); border-color: #FBDAB8; color: #7A3600; }
+        .alert.info .alert-icon { background: var(--orange); color: white; }
+        .alert.ok { background: var(--ok-soft); border-color: #B8E0C6; color: #0F4D25; }
+        .alert.ok .alert-icon { background: var(--ok); color: white; }
+        .alert strong { font-weight: 700; }
+        .alert small { display: block; opacity: 0.75; margin-top: 2px; font-size: 11.5px; }
 
-  /* ============= Print ============= */
-  @media print {
-    header.hero { background: var(--plum) !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .btn-print, .toolbar, .tabs { display: none !important; }
-    body { background: white; }
-    .card, .kpi { break-inside: avoid; box-shadow: none !important; }
-    section { margin-bottom: 24px; }
-    main { margin-top: 0; padding: 0 20px; }
-    .kpi-grid { grid-template-columns: repeat(4, 1fr); }
-    .table-wrap { overflow: visible; }
-    table.data { font-size: 10.5px; }
-    table.data thead th { position: static; }
-  }
+        /* Estados (Vazio/Erro) */
+        .empty-state { padding: 80px 32px; text-align: center; background: var(--surface); border: 1px dashed var(--line); border-radius: 18px; }
+        .empty-state h2 { font-family: 'Fraunces', serif; font-weight: 500; font-size: 24px; margin: 0 0 10px; }
+        .empty-state p { color: var(--muted); margin: 0 0 20px; max-width: 520px; margin-inline: auto; }
+        .empty-state a { color: var(--orange); font-weight: 600; text-decoration: none; }
+        .empty-state a:hover { text-decoration: underline; }
+        .empty-state code { font-family: 'JetBrains Mono', monospace; background: var(--line-soft); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
 
-  @media (max-width: 1100px) {
-    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-    .cat-summary { grid-template-columns: 1fr; }
-    .hero-title { font-size: 34px; }
-  }
-  @media (max-width: 640px) {
-    header.hero { padding: 22px 20px 44px; }
-    main { padding: 0 20px; margin-top: -28px; }
-    .hero-title { font-size: 28px; }
-    .kpi-grid { grid-template-columns: 1fr; }
-    .kpi-value { font-size: 28px; }
-  }
-</style>
+        .retry-btn { margin-top: 15px; padding: 8px 16px; background-color: var(--orange); color: #fff; border: none; border-radius: 6px; cursor: pointer; font-family: 'Manrope', sans-serif; font-weight: 600;}
+        .retry-btn:hover { background-color: var(--orange-deep); }
+
+        /* Animações */
+        .reveal { animation: reveal 0.5s ease-out both; }
+        .reveal:nth-child(2) { animation-delay: 0.06s; }
+        .reveal:nth-child(3) { animation-delay: 0.12s; }
+        .reveal:nth-child(4) { animation-delay: 0.18s; }
+        @keyframes reveal { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Responsividade & Print */
+        @media print {
+            header.hero { background: var(--plum) !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .btn-print, .toolbar, .tabs { display: none !important; }
+            body { background: white; }
+            .card, .kpi { break-inside: avoid; box-shadow: none !important; }
+            section { margin-bottom: 24px; }
+            main { margin-top: 0; padding: 0 20px; }
+            .kpi-grid { grid-template-columns: repeat(4, 1fr); }
+            .table-wrap { overflow: visible; }
+            table.data { font-size: 10.5px; }
+            table.data thead th { position: static; }
+        }
+        @media (max-width: 1100px) {
+            .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+            .cat-summary { grid-template-columns: 1fr; }
+            .hero-title { font-size: 34px; }
+        }
+        @media (max-width: 640px) {
+            header.hero { padding: 22px 20px 44px; }
+            main { padding: 0 20px; margin-top: -28px; }
+            .hero-title { font-size: 28px; }
+            .kpi-grid { grid-template-columns: 1fr; }
+            .kpi-value { font-size: 28px; }
+            .header-actions { flex-direction: column; align-items: flex-start;}
+        }
+    </style>
 </head>
 <body>
 
 <header class="hero">
-  <div class="hero-bar">
-    <div class="brand">
-      <div class="brand-mark">₣</div>
-      <div class="brand-text">
-        <h1>Pagamentos</h1>
-        <p>Dashboard executivo</p>
-      </div>
+    <div class="hero-bar">
+        <div class="brand">
+            <div class="brand-mark">
+                <img src="https://controladoriaon.github.io/Controladoria/logo-mascote.jpg" alt="ONTIME">
+            </div>
+            <div class="brand-text">
+                <h1>Pagamentos</h1>
+                <p>Dashboard executivo</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <span class="stamp" id="stamp" aria-live="polite"><span class="dot"></span><span id="stamp-text">carregando…</span></span>
+            <button class="btn-print" onclick="window.print()" aria-label="Imprimir Dashboard"><i class="ph-bold ph-printer"></i> Imprimir / PDF</button>
+            <a href="../" class="btn-print back-link" aria-label="Voltar ao Hub" style="text-decoration:none;"><i class="ph-bold ph-arrow-left"></i> Voltar ao Hub</a>
+        </div>
     </div>
-    <div class="header-actions">
-      <span class="stamp" id="stamp"><span class="dot"></span><span id="stamp-text">carregando…</span></span>
-      <button class="btn-print" onclick="window.print()">Imprimir / PDF</button>
+    <div class="hero-body">
+        <h2 class="hero-title" id="hero-title">Carregando dados<em>…</em></h2>
+        <p class="hero-sub" id="hero-sub">&nbsp;</p>
     </div>
-  </div>
-  <div class="hero-body">
-    <h2 class="hero-title" id="hero-title">Carregando dados<em>…</em></h2>
-    <p class="hero-sub" id="hero-sub">&nbsp;</p>
-  </div>
 </header>
 
 <main id="main">
-  <div class="empty-state" id="initial-state">
-    <h2>Aguarde, carregando dados…</h2>
-    <p>Se esta tela ficar aqui por mais de alguns segundos, é porque ainda não há um arquivo <code>data.json</code> no repositório.</p>
-  </div>
+    <div class="empty-state" id="initial-state" role="alert" aria-busy="true">
+        <h2>Aguarde, carregando dados…</h2>
+        <p>Se esta tela ficar aqui por mais de alguns segundos, é porque ainda não há um arquivo <code>data.json</code> no repositório.</p>
+    </div>
 </main>
 
 <script>
-/* ============================================================
-   FORMATAÇÃO
-   ============================================================ */
-const fmtBR = n => (n || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const fmtBRShort = n => {
-  if (!n) return '0';
-  if (Math.abs(n) >= 1e6) return (n/1e6).toLocaleString('pt-BR', {maximumFractionDigits:2}) + ' mi';
-  if (Math.abs(n) >= 1e3) return (n/1e3).toLocaleString('pt-BR', {maximumFractionDigits:1}) + ' mil';
-  return n.toLocaleString('pt-BR', {maximumFractionDigits:0});
-};
-const fmtDate = iso => {
-  if (!iso) return '—';
-  const d = new Date(iso + (iso.length === 10 ? 'T00:00:00' : ''));
-  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
-};
-const fmtDateShort = iso => {
-  if (!iso) return '—';
-  const d = new Date(iso + (iso.length === 10 ? 'T00:00:00' : ''));
-  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-};
-const fmtDateTime = iso => {
-  if (!iso) return '—';
-  const d = new Date(iso);
-  return d.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' }) + ' · ' +
-         d.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+/**
+ * ============================================================================
+ * PAGAMENTOS DASHBOARD - ARQUITETURA REFATORADA
+ * Foco: Modularização, Segurança XSS e Performance
+ * ============================================================================
+ */
+
+const CONFIG = {
+    DATA_URL: 'data.json',
+    DEBOUNCE_MS: 250,
+    MAX_TRUNCATE: 32,
+    RETRY_COUNT: 3
 };
 
-/* ============================================================
-   STATUS / STAMP
-   ============================================================ */
-function updateStamp(data) {
-  const stamp = document.getElementById('stamp');
-  const text = document.getElementById('stamp-text');
-  if (!data) {
-    stamp.className = 'stamp error';
-    text.textContent = 'sem dados';
-    return;
-  }
-  const gen = new Date(data.meta.generated_at);
-  const hoursAgo = (Date.now() - gen.getTime()) / 36e5;
-  let cls = 'stamp', label;
-  if (hoursAgo > 30) { cls = 'stamp stale'; label = `dados de ${Math.floor(hoursAgo/24)}d atrás`; }
-  else { label = `atualizado em ${fmtDateTime(data.meta.generated_at)}`; }
-  stamp.className = cls;
-  text.textContent = label;
-}
+// ==========================================
+// UTILS & FORMATTERS
+// ==========================================
+const Utils = {
+    fmtBR: n => (n || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+    fmtBRShort: n => {
+        if (!n) return '0';
+        if (Math.abs(n) >= 1e6) return (n/1e6).toLocaleString('pt-BR', {maximumFractionDigits:2}) + ' mi';
+        if (Math.abs(n) >= 1e3) return (n/1e3).toLocaleString('pt-BR', {maximumFractionDigits:1}) + ' mil';
+        return n.toLocaleString('pt-BR', {maximumFractionDigits:0});
+    },
+    fmtDate: iso => {
+        if (!iso) return '—';
+        const d = new Date(iso + (iso.length === 10 ? 'T00:00:00' : ''));
+        return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+    },
+    fmtDateShort: iso => {
+        if (!iso) return '—';
+        const d = new Date(iso + (iso.length === 10 ? 'T00:00:00' : ''));
+        return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+    },
+    fmtDateTime: iso => {
+        if (!iso) return '—';
+        const d = new Date(iso);
+        return d.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' }) + ' · ' +
+               d.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+    },
+    truncate: (s, n) => s.length > n ? s.slice(0, n-1) + '…' : s,
+    debounce: (fn, ms = CONFIG.DEBOUNCE_MS) => {
+        let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
+    },
+    pillClass: (tipo) => ({ NF: 'nf', BOL: 'bol', RD: 'rd' })[tipo] || ''
+};
 
-/* ============================================================
-   RENDER PRINCIPAL
-   ============================================================ */
-function render(data) {
-  document.getElementById('initial-state').remove();
-  const hoje = data.pago_hoje;
-  const prev = data.previsto_amanha;
-
-  // Hero
-  document.getElementById('hero-title').innerHTML = `Hoje: <em>R$ ${fmtBRShort(hoje.total)}</em> · Amanhã: <em>R$ ${fmtBRShort(prev.total)}</em>`;
-  document.getElementById('hero-sub').textContent = `Consolidado de pagamentos realizados em ${fmtDate(data.meta.data_hoje)} e prévia para ${fmtDate(data.meta.data_amanha)}`;
-
-  const main = document.getElementById('main');
-  main.innerHTML = '';
-
-  /* ---- Alerts ---- */
-  const alerts = buildAlerts(data);
-  if (alerts.length) {
-    const s = document.createElement('section');
-    s.className = 'reveal';
-    s.innerHTML = `<div class="alerts">${alerts.join('')}</div>`;
-    main.appendChild(s);
-  }
-
-  /* ---- KPIs ---- */
-  const kpis = document.createElement('section');
-  kpis.className = 'reveal';
-  const pagoSharePrev = prev.total ? ((hoje.total / prev.total) * 100).toFixed(0) : 0;
-  kpis.innerHTML = `
-    <div class="kpi-grid">
-      <div class="kpi accent">
-        <p class="kpi-label">Pago hoje</p>
-        <div class="kpi-value"><span class="prefix">R$</span><em>${fmtBR(hoje.total)}</em></div>
-        <p class="kpi-sub">${hoje.quantidade} títulos · ${fmtDate(data.meta.data_hoje)}</p>
-      </div>
-      <div class="kpi">
-        <p class="kpi-label">Previsto amanhã</p>
-        <div class="kpi-value"><span class="prefix">R$</span>${fmtBR(prev.total)}</div>
-        <p class="kpi-sub">${prev.quantidade} títulos · ${fmtDate(data.meta.data_amanha)}</p>
-      </div>
-      <div class="kpi">
-        <p class="kpi-label">Maior pagamento hoje</p>
-        <div class="kpi-value"><span class="prefix">R$</span>${fmtBR(hoje.maior?.valor || 0)}</div>
-        <p class="kpi-sub" title="${hoje.maior?.fornecedor || ''}">${truncate(hoje.maior?.fornecedor || '—', 32)}</p>
-      </div>
-      <div class="kpi">
-        <p class="kpi-label">Pendentes de aprovação</p>
-        <div class="kpi-value">${prev.em_aprovacao}</div>
-        <p class="kpi-sub"><span class="kpi-chip">risco</span> dos ${prev.quantidade} previstos</p>
-      </div>
-    </div>
-  `;
-  main.appendChild(kpis);
-
-  /* ---- Hoje realizado ---- */
-  main.appendChild(renderHojeSection(hoje, data.meta));
-
-  /* ---- Previsto amanhã ---- */
-  main.appendChild(renderPrevSection(prev, data.meta));
-}
-
-function truncate(s, n) {
-  return s.length > n ? s.slice(0, n-1) + '…' : s;
-}
-
-/* ============================================================
-   ALERTAS
-   ============================================================ */
-function buildAlerts(data) {
-  const arr = [];
-  const prev = data.previsto_amanha;
-  const hoje = data.pago_hoje;
-
-  if (prev.em_aprovacao > 0) {
-    arr.push(`
-      <div class="alert warn">
-        <div class="alert-icon">!</div>
-        <div><strong>${prev.em_aprovacao} títulos pendentes de aprovação</strong>
-        <small>Vencem amanhã e podem não ser pagos se não forem aprovados hoje.</small></div>
-      </div>`);
-  }
-  if (prev.total > hoje.total * 1.5 && hoje.total > 0) {
-    const mult = (prev.total / hoje.total).toFixed(1);
-    arr.push(`
-      <div class="alert info">
-        <div class="alert-icon">↑</div>
-        <div><strong>Prévia de amanhã ${mult}× maior que hoje</strong>
-        <small>R$ ${fmtBR(prev.total)} vs. R$ ${fmtBR(hoje.total)} pagos hoje. Conferir fluxo de caixa.</small></div>
-      </div>`);
-  }
-  const forns = prev.nf_servico.concat(prev.nf_titulo, prev.reembolso)
-    .map(x => (x.fornecedor || '').toUpperCase()).filter(Boolean);
-  const setHoje = new Set(hoje.titulos.map(t => (t.fornecedor || '').toUpperCase()).filter(Boolean));
-  const recorrentes = [...new Set(forns.filter(f => setHoje.has(f)))];
-  if (recorrentes.length) {
-    arr.push(`
-      <div class="alert ok">
-        <div class="alert-icon">↻</div>
-        <div><strong>${recorrentes.length} fornecedor${recorrentes.length>1?'es':''} recorrente${recorrentes.length>1?'s':''}</strong>
-        <small>Apareceram hoje e voltam amanhã. Ex.: ${recorrentes.slice(0,2).map(s => truncate(s, 28)).join(', ')}${recorrentes.length>2?' e mais':''}.</small></div>
-      </div>`);
-  }
-  return arr;
-}
-
-/* ============================================================
-   HOJE (Protheus)
-   ============================================================ */
-function renderHojeSection(hoje, meta) {
-  const sec = document.createElement('section');
-  sec.className = 'reveal';
-
-  // Estado local da tabela
-  const tipos = [...new Set(hoje.titulos.map(t => t.tipo).filter(Boolean))].sort();
-  let filter = { q: '', tipo: null };
-  let sort = { col: 'valor_rs', dir: -1 };
-
-  const cols = [
-    { key: 'numero',     label: 'Título',     render: t => `<span class="pill ${pillClass(t.tipo)}">${t.tipo||'?'}</span> ${t.numero}${t.parcela?`·${t.parcela}`:''}` },
-    { key: 'fornecedor', label: 'Fornecedor', render: t => `<div><div>${t.fornecedor||'—'}</div><div class="hist">${t.historico||''}</div></div>` },
-    { key: 'vencimento', label: 'Venc.',      render: t => `<span class="hist">${fmtDateShort(t.vencimento)}</span>` },
-    { key: 'forma_pgto', label: 'Forma',      render: t => t.forma_pgto || '—', num: false },
-    { key: 'valor_rs',   label: 'Valor',      render: t => `R$ ${fmtBR(t.valor_rs)}`, num: true, strong: true },
-  ];
-
-  sec.innerHTML = `
-    <div class="section-head">
-      <div>
-        <h2 class="section-title">Pagamentos realizados <span class="date">${fmtDate(meta.data_hoje)}</span></h2>
-        <p class="section-sub">${hoje.quantidade} títulos liquidados · Total R$ ${fmtBR(hoje.total)}</p>
-      </div>
-    </div>
-    <div class="card">
-      <div class="toolbar">
-        <div class="search"><input id="hoje-search" placeholder="Buscar fornecedor, histórico, título..." /></div>
-        <button class="filter-chip active" data-tipo="">Todos</button>
-        ${tipos.map(t => `<button class="filter-chip" data-tipo="${t}"><span class="pill ${pillClass(t)}">${t}</span></button>`).join('')}
-        <span class="toolbar-right">Mostrando <strong id="hoje-count">0</strong> · <strong id="hoje-total">R$ 0,00</strong></span>
-      </div>
-      <div class="table-wrap">
-        <table class="data" id="hoje-table">
-          <thead><tr>${cols.map(c => `<th data-key="${c.key}" class="${c.num?'num':''}">${c.label}</th>`).join('')}</tr></thead>
-          <tbody></tbody>
-          <tfoot class="data"></tfoot>
-        </table>
-      </div>
-    </div>
-  `;
-
-  function refresh() {
-    const rows = hoje.titulos.filter(t => {
-      if (filter.tipo && t.tipo !== filter.tipo) return false;
-      if (filter.q) {
-        const q = filter.q.toLowerCase();
-        const blob = (t.fornecedor + ' ' + t.historico + ' ' + t.numero + ' ' + t.natureza).toLowerCase();
-        if (!blob.includes(q)) return false;
-      }
-      return true;
-    });
-    const dir = sort.dir;
-    rows.sort((a, b) => {
-      let va = a[sort.col], vb = b[sort.col];
-      if (typeof va === 'number') return (va - vb) * dir;
-      return String(va||'').localeCompare(String(vb||''), 'pt-BR') * dir;
-    });
-
-    const tbody = sec.querySelector('tbody');
-    tbody.innerHTML = rows.map(t => `
-      <tr>
-        ${cols.map(c => `<td class="${c.num?'num':''} ${c.strong?'strong':''}">${c.render(t)}</td>`).join('')}
-      </tr>
-    `).join('') || `<tr><td colspan="${cols.length}" style="text-align:center;padding:32px;color:var(--muted)">Nenhum resultado</td></tr>`;
-
-    const total = rows.reduce((s, t) => s + (t.valor_rs || 0), 0);
-    sec.querySelector('#hoje-count').textContent = rows.length;
-    sec.querySelector('#hoje-total').textContent = 'R$ ' + fmtBR(total);
-
-    const tfoot = sec.querySelector('tfoot');
-    tfoot.innerHTML = `<tr><td colspan="${cols.length - 1}">Total exibido (${rows.length} de ${hoje.titulos.length})</td><td class="num">R$ ${fmtBR(total)}</td></tr>`;
-
-    // Sort indicators
-    sec.querySelectorAll('thead th').forEach(th => {
-      th.classList.toggle('sorted', th.dataset.key === sort.col);
-      th.dataset.dir = th.dataset.key === sort.col ? (dir > 0 ? '↑' : '↓') : '';
-    });
-  }
-
-  sec.addEventListener('click', e => {
-    const fc = e.target.closest('.filter-chip');
-    if (fc) {
-      sec.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
-      fc.classList.add('active');
-      filter.tipo = fc.dataset.tipo || null;
-      refresh();
+// ==========================================
+// DOM HELPER (Segurança Anti-XSS)
+// ==========================================
+const DOM = {
+    get: id => document.getElementById(id),
+    
+    // Construtor fluído para evitar innerHTML
+    el: (tag, attributes = {}, children = []) => {
+        const element = document.createElement(tag);
+        for (const [key, value] of Object.entries(attributes)) {
+            if (key.startsWith('data-') || key.startsWith('aria-')) element.setAttribute(key, value);
+            else if (key === 'className') element.className = value;
+            else if (key === 'textContent') element.textContent = value;
+            else if (key === 'innerHTML') element.innerHTML = value; // Reservado apenas para strings fixas (ícones)
+            else element[key] = value;
+        }
+        if (children) {
+            children.forEach(child => {
+                if (typeof child === 'string') element.appendChild(document.createTextNode(child));
+                else if (child instanceof Node) element.appendChild(child);
+            });
+        }
+        return element;
     }
-    const th = e.target.closest('thead th');
-    if (th) {
-      const k = th.dataset.key;
-      if (sort.col === k) sort.dir *= -1; else { sort.col = k; sort.dir = 1; }
-      refresh();
+};
+
+// ==========================================
+// DATA SERVICE
+// ==========================================
+const DataService = {
+    data: null,
+    async fetchWithRetry(url, retries = CONFIG.RETRY_COUNT) {
+        for (let i = 0; i < retries; i++) {
+            try {
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                return await res.json();
+            } catch (err) {
+                if (i === retries - 1) throw err;
+                await new Promise(r => setTimeout(r, 1000 * (i + 1))); // Backoff leve
+            }
+        }
     }
-  });
-  sec.querySelector('#hoje-search').addEventListener('input', e => { filter.q = e.target.value; refresh(); });
+};
 
-  setTimeout(refresh, 0);
-  return sec;
-}
+// ==========================================
+// UI COMPONENTS
+// ==========================================
+const UI = {
+    updateStamp() {
+        const stamp = DOM.get('stamp');
+        const text = DOM.get('stamp-text');
+        if (!DataService.data) {
+            stamp.className = 'stamp error';
+            text.textContent = 'sem dados';
+            return;
+        }
+        const gen = new Date(DataService.data.meta.generated_at);
+        const hoursAgo = (Date.now() - gen.getTime()) / 36e5;
+        if (hoursAgo > 30) {
+            stamp.className = 'stamp stale';
+            text.textContent = `dados de ${Math.floor(hoursAgo/24)}d atrás`;
+        } else {
+            stamp.className = 'stamp';
+            text.textContent = `atualizado em ${Utils.fmtDateTime(DataService.data.meta.generated_at)}`;
+        }
+    },
 
-function pillClass(tipo) {
-  return ({ NF: 'nf', BOL: 'bol', RD: 'rd' })[tipo] || '';
-}
+    renderHero() {
+        const d = DataService.data;
+        const main = DOM.get('main');
+        
+        const iState = DOM.get('initial-state');
+        if (iState) iState.remove();
 
-/* ============================================================
-   PREVISTO AMANHÃ (3 categorias)
-   ============================================================ */
-function renderPrevSection(prev, meta) {
-  const sec = document.createElement('section');
-  sec.className = 'reveal';
+        const title = DOM.get('hero-title');
+        title.innerHTML = '';
+        title.appendChild(document.createTextNode('Hoje: '));
+        title.appendChild(DOM.el('em', { textContent: `R$ ${Utils.fmtBRShort(d.pago_hoje.total)}` }));
+        title.appendChild(document.createTextNode(' · Amanhã: '));
+        title.appendChild(DOM.el('em', { textContent: `R$ ${Utils.fmtBRShort(d.previsto_amanha.total)}` }));
 
-  const cats = [
-    { key: 'nf_servico', label: 'NFs de Serviço',  data: prev.nf_servico },
-    { key: 'nf_titulo',  label: 'NFs de Título',   data: prev.nf_titulo },
-    { key: 'reembolso',  label: 'Reembolsos',      data: prev.reembolso },
-  ];
-  let activeCat = cats.reduce((a, b) => a.data.length >= b.data.length ? a : b).key;
-  let filter = { q: '' };
-  let sort = { col: 'valor_total', dir: -1 };
+        DOM.get('hero-sub').textContent = `Consolidado de pagamentos realizados em ${Utils.fmtDate(d.meta.data_hoje)} e prévia para ${Utils.fmtDate(d.meta.data_amanha)}`;
+        main.innerHTML = '';
+    },
 
-  sec.innerHTML = `
-    <div class="section-head">
-      <div>
-        <h2 class="section-title">Prévia de pagamentos <span class="date">${fmtDate(meta.data_amanha)}</span></h2>
-        <p class="section-sub">${prev.quantidade} títulos previstos · Total R$ ${fmtBR(prev.total)}</p>
-      </div>
-    </div>
+    renderAlerts() {
+        const d = DataService.data;
+        const prev = d.previsto_amanha;
+        const hoje = d.pago_hoje;
+        const main = DOM.get('main');
+        
+        const alertList = [];
+        
+        if (prev.em_aprovacao > 0) {
+            alertList.push(DOM.el('div', { className: 'alert warn' }, [
+                DOM.el('div', { className: 'alert-icon', textContent: '!' }),
+                DOM.el('div', {}, [
+                    DOM.el('strong', { textContent: `${prev.em_aprovacao} títulos pendentes de aprovação` }),
+                    DOM.el('small', { textContent: 'Vencem amanhã e podem não ser pagos se não forem aprovados hoje.' })
+                ])
+            ]));
+        }
 
-    <div class="card">
-      <div class="cat-summary">
-        ${cats.map(c => `
-          <div class="cat-item ${c.key===activeCat?'active':''}" data-cat="${c.key}" style="cursor:pointer">
-            <p class="cat-label">${c.label}</p>
-            <div class="cat-value">R$ ${fmtBR(prev.por_categoria[c.key].total)}</div>
-            <p class="cat-sub">${prev.por_categoria[c.key].quantidade} títulos</p>
-          </div>
-        `).join('')}
-      </div>
+        if (prev.total > hoje.total * 1.5 && hoje.total > 0) {
+            const mult = (prev.total / hoje.total).toFixed(1);
+            alertList.push(DOM.el('div', { className: 'alert info' }, [
+                DOM.el('div', { className: 'alert-icon', textContent: '↑' }),
+                DOM.el('div', {}, [
+                    DOM.el('strong', { textContent: `Prévia de amanhã ${mult}× maior que hoje` }),
+                    DOM.el('small', { textContent: `R$ ${Utils.fmtBR(prev.total)} vs. R$ ${Utils.fmtBR(hoje.total)} pagos hoje. Conferir fluxo de caixa.` })
+                ])
+            ]));
+        }
 
-      <div class="tabs">
-        ${cats.map(c => `
-          <button class="tab ${c.key===activeCat?'active':''}" data-cat="${c.key}">
-            ${c.label} <span class="tab-count">${c.data.length}</span>
-          </button>
-        `).join('')}
-      </div>
+        const forns = prev.nf_servico.concat(prev.nf_titulo, prev.reembolso).map(x => (x.fornecedor || '').toUpperCase()).filter(Boolean);
+        const setHoje = new Set(hoje.titulos.map(t => (t.fornecedor || '').toUpperCase()).filter(Boolean));
+        const recorrentes = [...new Set(forns.filter(f => setHoje.has(f)))];
 
-      <div class="toolbar">
-        <div class="search"><input id="prev-search" placeholder="Buscar fornecedor, solicitante, aprovador..." /></div>
-        <span class="toolbar-right">Mostrando <strong id="prev-count">0</strong> · <strong id="prev-total">R$ 0,00</strong></span>
-      </div>
+        if (recorrentes.length) {
+            const labelStr = `${recorrentes.length} fornecedor${recorrentes.length>1?'es':''} recorrente${recorrentes.length>1?'s':''}`;
+            const subStr = `Apareceram hoje e voltam amanhã. Ex.: ${recorrentes.slice(0,2).map(s => Utils.truncate(s, 28)).join(', ')}${recorrentes.length>2?' e mais':''}.`;
+            alertList.push(DOM.el('div', { className: 'alert ok' }, [
+                DOM.el('div', { className: 'alert-icon', textContent: '↻' }),
+                DOM.el('div', {}, [
+                    DOM.el('strong', { textContent: labelStr }),
+                    DOM.el('small', { textContent: subStr })
+                ])
+            ]));
+        }
 
-      <div class="table-wrap"><table class="data" id="prev-table"><thead></thead><tbody></tbody><tfoot class="data"></tfoot></table></div>
-    </div>
-  `;
+        if (alertList.length) {
+            const s = DOM.el('section', { className: 'reveal' });
+            const wrap = DOM.el('div', { className: 'alerts' });
+            alertList.forEach(a => wrap.appendChild(a));
+            s.appendChild(wrap);
+            main.appendChild(s);
+        }
+    },
 
-  const colsBy = {
-    nf_servico: [
-      { key: 'numero_nf',      label: 'NF',           render: r => r.numero_nf || '—' },
-      { key: 'fornecedor',     label: 'Fornecedor',   render: r => `<div><div>${r.fornecedor || '—'}</div><div class="hist">${r.observacoes ? truncate(r.observacoes, 64) : ''}</div></div>` },
-      { key: 'empresa',        label: 'Empresa',      render: r => r.empresa || '—' },
-      { key: 'aprovador',      label: 'Aprovador',    render: r => r.aprovador || '—' },
-      { key: 'status',         label: 'Status',       render: r => renderStatus(r.status) },
-      { key: 'valor_total',    label: 'Valor',        render: r => `R$ ${fmtBR(r.valor_total)}`, num: true, strong: true },
+    renderKPIs() {
+        const d = DataService.data;
+        const prev = d.previsto_amanha;
+        const hoje = d.pago_hoje;
+        const main = DOM.get('main');
+
+        const kpis = DOM.el('section', { className: 'reveal' });
+        
+        // Block 1
+        const b1 = DOM.el('div', { className: 'kpi accent' }, [
+            DOM.el('p', { className: 'kpi-label', textContent: 'Pago hoje' }),
+            DOM.el('div', { className: 'kpi-value' }, [DOM.el('span', { className: 'prefix', textContent: 'R$' }), DOM.el('em', { textContent: Utils.fmtBR(hoje.total) })]),
+            DOM.el('p', { className: 'kpi-sub', textContent: `${hoje.quantidade} títulos · ${Utils.fmtDate(d.meta.data_hoje)}` })
+        ]);
+
+        // Block 2
+        const b2 = DOM.el('div', { className: 'kpi' }, [
+            DOM.el('p', { className: 'kpi-label', textContent: 'Previsto amanhã' }),
+            DOM.el('div', { className: 'kpi-value' }, [DOM.el('span', { className: 'prefix', textContent: 'R$' }), document.createTextNode(Utils.fmtBR(prev.total))]),
+            DOM.el('p', { className: 'kpi-sub', textContent: `${prev.quantidade} títulos · ${Utils.fmtDate(d.meta.data_amanha)}` })
+        ]);
+
+        // Block 3
+        const mForn = hoje.maior?.fornecedor || '—';
+        const b3 = DOM.el('div', { className: 'kpi' }, [
+            DOM.el('p', { className: 'kpi-label', textContent: 'Maior pagamento hoje' }),
+            DOM.el('div', { className: 'kpi-value' }, [DOM.el('span', { className: 'prefix', textContent: 'R$' }), document.createTextNode(Utils.fmtBR(hoje.maior?.valor || 0))]),
+            DOM.el('p', { className: 'kpi-sub', title: mForn, textContent: Utils.truncate(mForn, 32) })
+        ]);
+
+        // Block 4
+        const b4 = DOM.el('div', { className: 'kpi' }, [
+            DOM.el('p', { className: 'kpi-label', textContent: 'Pendentes de aprovação' }),
+            DOM.el('div', { className: 'kpi-value', textContent: prev.em_aprovacao }),
+            DOM.el('p', { className: 'kpi-sub' }, [DOM.el('span', { className: 'kpi-chip', textContent: 'risco' }), document.createTextNode(` dos ${prev.quantidade} previstos`)])
+        ]);
+
+        kpis.appendChild(DOM.el('div', { className: 'kpi-grid' }, [b1, b2, b3, b4]));
+        main.appendChild(kpis);
+    }
+};
+
+// ==========================================
+// SEÇÃO HOJE
+// ==========================================
+const UI_Hoje = {
+    state: { filter: { q: '', tipo: null }, sort: { col: 'valor_rs', dir: -1 } },
+    cols: [
+        { key: 'numero', label: 'Título', render: t => [DOM.el('span', { className: `pill ${Utils.pillClass(t.tipo)}`, textContent: t.tipo||'?' }), document.createTextNode(` ${t.numero}${t.parcela?'·'+t.parcela:''}`)] },
+        { key: 'fornecedor', label: 'Fornecedor', render: t => DOM.el('div', {}, [DOM.el('div', { textContent: t.fornecedor||'—' }), DOM.el('div', { className: 'hist', textContent: t.historico||'' })]) },
+        { key: 'vencimento', label: 'Venc.', render: t => DOM.el('span', { className: 'hist', textContent: Utils.fmtDateShort(t.vencimento) }) },
+        { key: 'forma_pgto', label: 'Forma', render: t => t.forma_pgto || '—', num: false },
+        { key: 'valor_rs', label: 'Valor', render: t => `R$ ${Utils.fmtBR(t.valor_rs)}`, num: true, strong: true }
     ],
-    nf_titulo: [
-      { key: 'numero_titulo',  label: 'Título',       render: r => r.numero_titulo || '—' },
-      { key: 'fornecedor',     label: 'Fornecedor',   render: r => `<div><div>${r.fornecedor || '—'}</div><div class="hist">${r.historico || ''}</div></div>` },
-      { key: 'empresa',        label: 'Empresa',      render: r => r.empresa || '—' },
-      { key: 'aprovador',      label: 'Aprovador',    render: r => r.aprovador || '—' },
-      { key: 'status',         label: 'Status',       render: r => renderStatus(r.status) },
-      { key: 'valor_total',    label: 'Valor',        render: r => `R$ ${fmtBR(r.valor_total)}`, num: true, strong: true },
-    ],
-    reembolso: [
-      { key: 'solicitante',    label: 'Solicitante',  render: r => r.solicitante || '—' },
-      { key: 'tipo_despesa',   label: 'Tipo despesa', render: r => `<span class="pill">${r.tipo_despesa||'—'}</span>` },
-      { key: 'fornecedor',     label: 'Beneficiário', render: r => r.fornecedor || '—' },
-      { key: 'tipo_solicitacao',label:'Solicitação',  render: r => r.tipo_solicitacao || '—' },
-      { key: 'aprovador',      label: 'Aprovador',    render: r => r.aprovador || '—' },
-      { key: 'valor_total',    label: 'Valor',        render: r => `R$ ${fmtBR(r.valor_total)}`, num: true, strong: true },
-    ],
-  };
 
-  function renderStatus(s) {
-    if (!s) return '<span class="pill">—</span>';
-    const l = s.toLowerCase();
-    if (/aprova[cç][aã]o/.test(l)) return `<span class="pill warn">${s}</span>`;
-    if (/aguardando|baixa/.test(l)) return `<span class="pill ok">${s}</span>`;
-    return `<span class="pill">${s}</span>`;
-  }
+    render() {
+        const hoje = DataService.data.pago_hoje;
+        const sec = DOM.el('section', { className: 'reveal' });
+        
+        const tipos = [...new Set(hoje.titulos.map(t => t.tipo).filter(Boolean))].sort();
 
-  function refresh() {
-    const cat = cats.find(c => c.key === activeCat);
-    const cols = colsBy[activeCat];
-    let rows = cat.data.filter(r => {
-      if (!filter.q) return true;
-      const q = filter.q.toLowerCase();
-      return JSON.stringify(r).toLowerCase().includes(q);
-    });
-    const dir = sort.dir;
-    const validCol = cols.find(c => c.key === sort.col) ? sort.col : cols[cols.length-1].key;
-    rows.sort((a, b) => {
-      let va = a[validCol], vb = b[validCol];
-      if (typeof va === 'number' || typeof vb === 'number') return ((va||0) - (vb||0)) * dir;
-      return String(va||'').localeCompare(String(vb||''), 'pt-BR') * dir;
-    });
+        // Cabecalho da seção
+        const head = DOM.el('div', { className: 'section-head' }, [
+            DOM.el('div', {}, [
+                DOM.el('h2', { className: 'section-title', innerHTML: `Pagamentos realizados <span class="date">${Utils.fmtDate(DataService.data.meta.data_hoje)}</span>` }),
+                DOM.el('p', { className: 'section-sub', textContent: `${hoje.quantidade} títulos liquidados · Total R$ ${Utils.fmtBR(hoje.total)}` })
+            ])
+        ]);
 
-    const thead = sec.querySelector('thead');
-    thead.innerHTML = `<tr>${cols.map(c => `<th data-key="${c.key}" class="${c.num?'num':''} ${c.key===validCol?'sorted':''}" data-dir="${c.key===validCol?(dir>0?'↑':'↓'):''}">${c.label}</th>`).join('')}</tr>`;
+        const card = DOM.el('div', { className: 'card' });
+        
+        // Toolbar
+        const toolbar = DOM.el('div', { className: 'toolbar' });
+        const searchInput = DOM.el('input', { id: 'hoje-search', placeholder: 'Buscar fornecedor, histórico, título...' });
+        searchInput.addEventListener('input', Utils.debounce(e => { this.state.filter.q = e.target.value; this.refresh(sec); }));
+        toolbar.appendChild(DOM.el('div', { className: 'search' }, [searchInput]));
 
-    const tbody = sec.querySelector('tbody');
-    tbody.innerHTML = rows.map(r => {
-      const risk = /aprova[cç][aã]o/i.test(r.status || '');
-      return `<tr class="${risk?'flag-approval':''}">
-        ${cols.map(c => `<td class="${c.num?'num':''} ${c.strong?'strong':''}">${c.render(r)}</td>`).join('')}
-      </tr>`;
-    }).join('') || `<tr><td colspan="${cols.length}" style="text-align:center;padding:32px;color:var(--muted)">Nenhum título ${cat.label.toLowerCase()} previsto</td></tr>`;
+        // Filtros (Chips)
+        const btnAll = DOM.el('button', { className: 'filter-chip active', 'data-tipo': '', textContent: 'Todos' });
+        toolbar.appendChild(btnAll);
+        
+        tipos.forEach(t => {
+            const btn = DOM.el('button', { className: 'filter-chip', 'data-tipo': t }, [
+                DOM.el('span', { className: `pill ${Utils.pillClass(t)}`, textContent: t })
+            ]);
+            toolbar.appendChild(btn);
+        });
 
-    const total = rows.reduce((s, r) => s + (r.valor_total || 0), 0);
-    sec.querySelector('#prev-count').textContent = rows.length;
-    sec.querySelector('#prev-total').textContent = 'R$ ' + fmtBR(total);
-    const tfoot = sec.querySelector('tfoot');
-    tfoot.innerHTML = `<tr><td colspan="${cols.length - 1}">Total exibido (${rows.length} de ${cat.data.length})</td><td class="num">R$ ${fmtBR(total)}</td></tr>`;
-  }
+        // Contadores Toolbar
+        toolbar.appendChild(DOM.el('span', { className: 'toolbar-right', innerHTML: `Mostrando <strong id="hoje-count">0</strong> · <strong id="hoje-total">R$ 0,00</strong>` }));
+        card.appendChild(toolbar);
 
-  sec.addEventListener('click', e => {
-    const tab = e.target.closest('.tab');
-    if (tab) {
-      activeCat = tab.dataset.cat;
-      sec.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.cat === activeCat));
-      sec.querySelectorAll('.cat-item').forEach(t => t.classList.toggle('active', t.dataset.cat === activeCat));
-      sort = { col: 'valor_total', dir: -1 };
-      refresh();
+        // Tabela
+        const tableWrap = DOM.el('div', { className: 'table-wrap' });
+        const thead = DOM.el('thead');
+        const trHead = DOM.el('tr');
+        
+        this.cols.forEach(c => {
+            const th = DOM.el('th', { 'data-key': c.key, className: c.num?'num':'' });
+            th.textContent = c.label;
+            trHead.appendChild(th);
+        });
+        thead.appendChild(trHead);
+
+        const tbody = DOM.el('tbody');
+        const tfoot = DOM.el('tfoot', { className: 'data' });
+        const table = DOM.el('table', { className: 'data', id: 'hoje-table' }, [thead, tbody, tfoot]);
+        tableWrap.appendChild(table);
+        card.appendChild(tableWrap);
+
+        sec.appendChild(head);
+        sec.appendChild(card);
+
+        // Eventos Tabela/Chips
+        sec.addEventListener('click', e => {
+            const fc = e.target.closest('.filter-chip');
+            if (fc) {
+                sec.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+                fc.classList.add('active');
+                this.state.filter.tipo = fc.getAttribute('data-tipo') || null;
+                this.refresh(sec);
+            }
+            const th = e.target.closest('thead th');
+            if (th) {
+                const k = th.getAttribute('data-key');
+                if (this.state.sort.col === k) this.state.sort.dir *= -1;
+                else { this.state.sort.col = k; this.state.sort.dir = 1; }
+                this.refresh(sec);
+            }
+        });
+
+        DOM.get('main').appendChild(sec);
+        setTimeout(() => this.refresh(sec), 0);
+    },
+
+    refresh(sec) {
+        const hoje = DataService.data.pago_hoje;
+        let rows = hoje.titulos.filter(t => {
+            if (this.state.filter.tipo && t.tipo !== this.state.filter.tipo) return false;
+            if (this.state.filter.q) {
+                const q = this.state.filter.q.toLowerCase();
+                const blob = (t.fornecedor + ' ' + t.historico + ' ' + t.numero + ' ' + t.natureza).toLowerCase();
+                if (!blob.includes(q)) return false;
+            }
+            return true;
+        });
+
+        const { col, dir } = this.state.sort;
+        rows.sort((a, b) => {
+            let va = a[col], vb = b[col];
+            if (typeof va === 'number') return (va - vb) * dir;
+            return String(va||'').localeCompare(String(vb||''), 'pt-BR') * dir;
+        });
+
+        const tbody = sec.querySelector('tbody');
+        tbody.innerHTML = '';
+
+        if (rows.length === 0) {
+            tbody.appendChild(DOM.el('tr', {}, [DOM.el('td', { colSpan: this.cols.length, style: 'text-align:center;padding:32px;color:var(--muted)', textContent: 'Nenhum resultado' })]));
+        } else {
+            const frag = document.createDocumentFragment();
+            rows.forEach(t => {
+                const tr = DOM.el('tr');
+                this.cols.forEach(c => {
+                    const td = DOM.el('td', { className: `${c.num ? 'num' : ''} ${c.strong ? 'strong' : ''}`.trim() });
+                    const content = c.render(t);
+                    if (Array.isArray(content)) content.forEach(n => td.appendChild(n));
+                    else if (content instanceof Node) td.appendChild(content);
+                    else td.textContent = content;
+                    tr.appendChild(td);
+                });
+                frag.appendChild(tr);
+            });
+            tbody.appendChild(frag);
+        }
+
+        const total = rows.reduce((s, t) => s + (t.valor_rs || 0), 0);
+        sec.querySelector('#hoje-count').textContent = rows.length;
+        sec.querySelector('#hoje-total').textContent = 'R$ ' + Utils.fmtBR(total);
+
+        const tfoot = sec.querySelector('tfoot');
+        tfoot.innerHTML = '';
+        tfoot.appendChild(DOM.el('tr', {}, [
+            DOM.el('td', { colSpan: this.cols.length - 1, textContent: `Total exibido (${rows.length} de ${hoje.titulos.length})` }),
+            DOM.el('td', { className: 'num', textContent: `R$ ${Utils.fmtBR(total)}` })
+        ]));
+
+        sec.querySelectorAll('thead th').forEach(th => {
+            const isSorted = th.getAttribute('data-key') === col;
+            th.classList.toggle('sorted', isSorted);
+            if (isSorted) th.setAttribute('data-dir', dir > 0 ? '↑' : '↓');
+            else th.removeAttribute('data-dir');
+        });
     }
-    const ci = e.target.closest('.cat-item');
-    if (ci) {
-      activeCat = ci.dataset.cat;
-      sec.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.cat === activeCat));
-      sec.querySelectorAll('.cat-item').forEach(t => t.classList.toggle('active', t.dataset.cat === activeCat));
-      sort = { col: 'valor_total', dir: -1 };
-      refresh();
+};
+
+// ==========================================
+// SEÇÃO PREVISTO
+// ==========================================
+const UI_Previsto = {
+    state: { filter: { q: '' }, sort: { col: 'valor_total', dir: -1 }, activeCat: null },
+    
+    // Definições de colunas com elementos DOM seguros
+    colsBy: {
+        nf_servico: [
+            { key: 'numero_nf', label: 'NF', render: r => r.numero_nf || '—' },
+            { key: 'fornecedor', label: 'Fornecedor', render: r => DOM.el('div', {}, [DOM.el('div', { textContent: r.fornecedor || '—' }), DOM.el('div', { className: 'hist', textContent: r.observacoes ? Utils.truncate(r.observacoes, 64) : '' })]) },
+            { key: 'empresa', label: 'Empresa', render: r => r.empresa || '—' },
+            { key: 'aprovador', label: 'Aprovador', render: r => r.aprovador || '—' },
+            { key: 'status', label: 'Status', render: r => UI_Previsto.renderStatus(r.status) },
+            { key: 'valor_total', label: 'Valor', render: r => `R$ ${Utils.fmtBR(r.valor_total)}`, num: true, strong: true }
+        ],
+        nf_titulo: [
+            { key: 'numero_titulo', label: 'Título', render: r => r.numero_titulo || '—' },
+            { key: 'fornecedor', label: 'Fornecedor', render: r => DOM.el('div', {}, [DOM.el('div', { textContent: r.fornecedor || '—' }), DOM.el('div', { className: 'hist', textContent: r.historico || '' })]) },
+            { key: 'empresa', label: 'Empresa', render: r => r.empresa || '—' },
+            { key: 'aprovador', label: 'Aprovador', render: r => r.aprovador || '—' },
+            { key: 'status', label: 'Status', render: r => UI_Previsto.renderStatus(r.status) },
+            { key: 'valor_total', label: 'Valor', render: r => `R$ ${Utils.fmtBR(r.valor_total)}`, num: true, strong: true }
+        ],
+        reembolso: [
+            { key: 'solicitante', label: 'Solicitante', render: r => r.solicitante || '—' },
+            { key: 'tipo_despesa', label: 'Tipo despesa', render: r => DOM.el('span', { className: 'pill', textContent: r.tipo_despesa || '—' }) },
+            { key: 'fornecedor', label: 'Beneficiário', render: r => r.fornecedor || '—' },
+            { key: 'tipo_solicitacao', label: 'Solicitação', render: r => r.tipo_solicitacao || '—' },
+            { key: 'aprovador', label: 'Aprovador', render: r => r.aprovador || '—' },
+            { key: 'valor_total', label: 'Valor', render: r => `R$ ${Utils.fmtBR(r.valor_total)}`, num: true, strong: true }
+        ]
+    },
+
+    renderStatus(s) {
+        if (!s) return DOM.el('span', { className: 'pill', textContent: '—' });
+        const l = s.toLowerCase();
+        if (/aprova[cç][aã]o/.test(l)) return DOM.el('span', { className: 'pill warn', textContent: s });
+        if (/aguardando|baixa/.test(l)) return DOM.el('span', { className: 'pill ok', textContent: s });
+        return DOM.el('span', { className: 'pill', textContent: s });
+    },
+
+    render() {
+        const prev = DataService.data.previsto_amanha;
+        const meta = DataService.data.meta;
+        const sec = DOM.el('section', { className: 'reveal' });
+
+        this.cats = [
+            { key: 'nf_servico', label: 'NFs de Serviço', data: prev.nf_servico },
+            { key: 'nf_titulo', label: 'NFs de Título', data: prev.nf_titulo },
+            { key: 'reembolso', label: 'Reembolsos', data: prev.reembolso },
+        ];
+
+        this.state.activeCat = this.cats.reduce((a, b) => a.data.length >= b.data.length ? a : b).key;
+
+        // Head
+        sec.appendChild(DOM.el('div', { className: 'section-head' }, [
+            DOM.el('div', {}, [
+                DOM.el('h2', { className: 'section-title', innerHTML: `Prévia de pagamentos <span class="date">${Utils.fmtDate(meta.data_amanha)}</span>` }),
+                DOM.el('p', { className: 'section-sub', textContent: `${prev.quantidade} títulos previstos · Total R$ ${Utils.fmtBR(prev.total)}` })
+            ])
+        ]));
+
+        const card = DOM.el('div', { className: 'card' });
+
+        // Categoria Grid superior
+        const catSum = DOM.el('div', { className: 'cat-summary' });
+        this.cats.forEach(c => {
+            const active = c.key === this.state.activeCat ? 'active' : '';
+            catSum.appendChild(DOM.el('div', { className: `cat-item ${active}`, 'data-cat': c.key, style: 'cursor:pointer' }, [
+                DOM.el('p', { className: 'cat-label', textContent: c.label }),
+                DOM.el('div', { className: 'cat-value', textContent: `R$ ${Utils.fmtBR(prev.por_categoria[c.key].total)}` }),
+                DOM.el('p', { className: 'cat-sub', textContent: `${prev.por_categoria[c.key].quantidade} títulos` })
+            ]));
+        });
+        card.appendChild(catSum);
+
+        // Abas
+        const tabs = DOM.el('div', { className: 'tabs' });
+        this.cats.forEach(c => {
+            const active = c.key === this.state.activeCat ? 'active' : '';
+            tabs.appendChild(DOM.el('button', { className: `tab ${active}`, 'data-cat': c.key }, [
+                document.createTextNode(`${c.label} `),
+                DOM.el('span', { className: 'tab-count', textContent: c.data.length })
+            ]));
+        });
+        card.appendChild(tabs);
+
+        // Toolbar
+        const toolbar = DOM.el('div', { className: 'toolbar' });
+        const input = DOM.el('input', { id: 'prev-search', placeholder: 'Buscar fornecedor, solicitante, aprovador...' });
+        input.addEventListener('input', Utils.debounce(e => { this.state.filter.q = e.target.value; this.refresh(sec); }));
+        toolbar.appendChild(DOM.el('div', { className: 'search' }, [input]));
+        toolbar.appendChild(DOM.el('span', { className: 'toolbar-right', innerHTML: `Mostrando <strong id="prev-count">0</strong> · <strong id="prev-total">R$ 0,00</strong>` }));
+        card.appendChild(toolbar);
+
+        // Tabela
+        const tableWrap = DOM.el('div', { className: 'table-wrap' });
+        tableWrap.appendChild(DOM.el('table', { className: 'data', id: 'prev-table' }, [
+            DOM.el('thead'), DOM.el('tbody'), DOM.el('tfoot', { className: 'data' })
+        ]));
+        card.appendChild(tableWrap);
+
+        sec.appendChild(card);
+
+        // Eventos
+        sec.addEventListener('click', e => {
+            const btnCat = e.target.closest('.tab') || e.target.closest('.cat-item');
+            if (btnCat) {
+                this.state.activeCat = btnCat.getAttribute('data-cat');
+                sec.querySelectorAll('.tab, .cat-item').forEach(t => t.classList.toggle('active', t.getAttribute('data-cat') === this.state.activeCat));
+                this.state.sort = { col: 'valor_total', dir: -1 };
+                this.refresh(sec);
+            }
+            
+            const th = e.target.closest('thead th');
+            if (th) {
+                const k = th.getAttribute('data-key');
+                if (this.state.sort.col === k) this.state.sort.dir *= -1; 
+                else { this.state.sort.col = k; this.state.sort.dir = 1; }
+                this.refresh(sec);
+            }
+        });
+
+        DOM.get('main').appendChild(sec);
+        setTimeout(() => this.refresh(sec), 0);
+    },
+
+    refresh(sec) {
+        const cat = this.cats.find(c => c.key === this.state.activeCat);
+        const cols = this.colsBy[this.state.activeCat];
+        
+        let rows = cat.data.filter(r => {
+            if (!this.state.filter.q) return true;
+            const q = this.state.filter.q.toLowerCase();
+            return JSON.stringify(r).toLowerCase().includes(q);
+        });
+
+        const { col, dir } = this.state.sort;
+        const validCol = cols.find(c => c.key === col) ? col : cols[cols.length-1].key;
+        
+        rows.sort((a, b) => {
+            let va = a[validCol], vb = b[validCol];
+            if (typeof va === 'number' || typeof vb === 'number') return ((va||0) - (vb||0)) * dir;
+            return String(va||'').localeCompare(String(vb||''), 'pt-BR') * dir;
+        });
+
+        // Thead
+        const thead = sec.querySelector('thead');
+        thead.innerHTML = '';
+        const trHead = DOM.el('tr');
+        cols.forEach(c => {
+            const th = DOM.el('th', { 'data-key': c.key, className: `${c.num?'num':''} ${c.key===validCol?'sorted':''}`.trim(), textContent: c.label });
+            if (c.key === validCol) th.setAttribute('data-dir', dir > 0 ? '↑' : '↓');
+            trHead.appendChild(th);
+        });
+        thead.appendChild(trHead);
+
+        // Tbody
+        const tbody = sec.querySelector('tbody');
+        tbody.innerHTML = '';
+
+        if (rows.length === 0) {
+            tbody.appendChild(DOM.el('tr', {}, [DOM.el('td', { colSpan: cols.length, style: 'text-align:center;padding:32px;color:var(--muted)', textContent: `Nenhum título ${cat.label.toLowerCase()} previsto` })]));
+        } else {
+            const frag = document.createDocumentFragment();
+            rows.forEach(r => {
+                const risk = /aprova[cç][aã]o/i.test(r.status || '');
+                const tr = DOM.el('tr', { className: risk ? 'flag-approval' : '' });
+                cols.forEach(c => {
+                    const td = DOM.el('td', { className: `${c.num ? 'num' : ''} ${c.strong ? 'strong' : ''}`.trim() });
+                    const content = c.render(r);
+                    if (Array.isArray(content)) content.forEach(n => td.appendChild(n));
+                    else if (content instanceof Node) td.appendChild(content);
+                    else td.textContent = content;
+                    tr.appendChild(td);
+                });
+                frag.appendChild(tr);
+            });
+            tbody.appendChild(frag);
+        }
+
+        const total = rows.reduce((s, r) => s + (r.valor_total || 0), 0);
+        sec.querySelector('#prev-count').textContent = rows.length;
+        sec.querySelector('#prev-total').textContent = 'R$ ' + Utils.fmtBR(total);
+        
+        const tfoot = sec.querySelector('tfoot');
+        tfoot.innerHTML = '';
+        tfoot.appendChild(DOM.el('tr', {}, [
+            DOM.el('td', { colSpan: cols.length - 1, textContent: `Total exibido (${rows.length} de ${cat.data.length})` }),
+            DOM.el('td', { className: 'num', textContent: `R$ ${Utils.fmtBR(total)}` })
+        ]));
     }
-    const th = e.target.closest('thead th');
-    if (th) {
-      const k = th.dataset.key;
-      if (sort.col === k) sort.dir *= -1; else { sort.col = k; sort.dir = 1; }
-      refresh();
+};
+
+// ==========================================
+// APP BOOTSTRAP
+// ==========================================
+const App = {
+    async init() {
+        this.setupBackButton();
+
+        try {
+            const data = await DataService.fetchWithRetry(`${CONFIG.DATA_URL}?v=${Date.now()}`);
+            DataService.data = data;
+            
+            UI.updateStamp();
+            UI.renderHero();
+            UI.renderAlerts();
+            UI.renderKPIs();
+            UI_Hoje.render();
+            UI_Previsto.render();
+
+        } catch (e) {
+            this.renderError(`Não foi possível carregar os dados. Detalhe técnico: ${e.message}`);
+        }
+    },
+
+    setupBackButton() {
+        const btn = document.querySelector('.back-link');
+        const ref = document.referrer;
+        if (btn && (!ref || !ref.includes(window.location.hostname))) {
+            btn.style.display = 'none';
+        }
+    },
+
+    renderError(msg) {
+        const main = DOM.get('main');
+        main.innerHTML = '';
+        main.appendChild(DOM.el('div', { className: 'empty-state' }, [
+            DOM.el('h2', { textContent: 'Ainda não tem dados por aqui' }),
+            DOM.el('p', { textContent: msg }),
+            DOM.el('p', { style: 'margin-top:24px' }, [
+                DOM.el('a', { href: 'atualizar.html', textContent: '→ Ir para a ferramenta de atualização' })
+            ])
+        ]));
+
+        DOM.get('hero-title').innerHTML = `Sem dados<em>.</em>`;
+        DOM.get('hero-sub').textContent = 'Gere um data.json na ferramenta de atualização e suba no repositório.';
+        
+        const stamp = DOM.get('stamp');
+        stamp.className = 'stamp error';
+        DOM.get('stamp-text').textContent = 'sem data.json';
     }
-  });
-  sec.querySelector('#prev-search').addEventListener('input', e => { filter.q = e.target.value; refresh(); });
+};
 
-  setTimeout(refresh, 0);
-  return sec;
-}
+document.addEventListener('DOMContentLoaded', () => App.init());
 
-/* ============================================================
-   EMPTY / ERROR STATES
-   ============================================================ */
-function renderError(msg) {
-  const main = document.getElementById('main');
-  main.innerHTML = `
-    <div class="empty-state">
-      <h2>Ainda não tem dados por aqui</h2>
-      <p>${msg}</p>
-      <p style="margin-top:24px"><a href="atualizar.html">→ Ir para a ferramenta de atualização</a></p>
-    </div>
-  `;
-  document.getElementById('hero-title').innerHTML = `Sem dados<em>.</em>`;
-  document.getElementById('hero-sub').textContent = 'Gere um data.json na ferramenta de atualização e suba no repositório.';
-  const stamp = document.getElementById('stamp');
-  stamp.className = 'stamp error';
-  document.getElementById('stamp-text').textContent = 'sem data.json';
-}
-
-/* ============================================================
-   BOOTSTRAP
-   ============================================================ */
-async function boot() {
-  try {
-    const res = await fetch('data.json?v=' + Date.now());
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    updateStamp(data);
-    render(data);
-  } catch (e) {
-    renderError(`Não consegui carregar <code>data.json</code>. Suba o arquivo no repositório (mesma pasta deste index.html). Detalhe técnico: ${e.message}`);
-  }
-}
-boot();
 </script>
 </body>
 </html>
