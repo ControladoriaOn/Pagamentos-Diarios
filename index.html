@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Pagamentos · Dashboard</title>
 
+<link rel="icon" type="image/png" href="https://controladoriaon.github.io/Controladoria/favicon.png?v=3">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -23,7 +25,6 @@
     --ink:             #1A0F1A;
     --muted:           #6B5E6B;
     --subtle:          #A89CB0;
-
     --plum:            #3C003C;
     --plum-deep:       #2A0028;
     --plum-light:      #5C1A5C;
@@ -33,7 +34,6 @@
     --orange-soft:     #FFF1E4;
     --orange-tint:     rgba(255,110,0,0.12);
     --orange-deep:     #D25500;
-
     --ok:              #1F7A3D;
     --ok-soft:         #EAF7EE;
     --warn:            #C77700;
@@ -44,7 +44,6 @@
     --font-display:    'Fraunces', 'Times New Roman', serif;
     --font-body:       'Manrope', system-ui, sans-serif;
     --font-mono:       'JetBrains Mono', ui-monospace, monospace;
-
     --shadow-sm:       0 1px 2px rgba(26,15,26,0.04);
     --shadow-md:       0 4px 14px -6px rgba(26,15,26,0.08);
     --shadow-lg:       0 14px 32px -14px rgba(26,15,26,0.15);
@@ -868,7 +867,9 @@
 
 <aside class="sidebar" aria-label="Navegação principal">
   <div class="logo">
-    <div class="logo-mark">₣</div>
+    <div class="logo-mark" style="padding: 0; overflow: hidden;">
+      <img src="https://controladoriaon.github.io/Controladoria/logo-mascote.jpg" alt="ONTIME" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+    </div>
     <div class="logo-text">
       <span>Financeiro</span>
       <span>Pagamentos</span>
@@ -894,8 +895,7 @@
         <span class="stamp-text" id="stamp-text">carregando…</span>
       </div>
     </div>
-    <!-- TODO: Ajuste o href de "Voltar ao Hub" para a URL real do seu hub. -->
-    <a class="btn-hub" href="/" rel="noopener">
+    <a class="btn-hub" href="../" rel="noopener">
       <i class="fa-solid fa-arrow-left-long"></i>
       Voltar ao Hub
     </a>
@@ -922,7 +922,6 @@
 
 <script>
 'use strict';
-
 /* ============================================================================
    CONFIG
    ============================================================================ */
@@ -989,7 +988,6 @@ const Utils = {
   delay(ms) {
     return new Promise(r => setTimeout(r, ms));
   },
-  /** Debounce com window de `wait` ms — essencial pro search */
   debounce(fn, wait) {
     let timer = null;
     return function debounced(...args) {
@@ -997,7 +995,6 @@ const Utils = {
       timer = setTimeout(() => fn.apply(this, args), wait);
     };
   },
-  /** Capitaliza uma frase ALL CAPS: "SEGURO DE VEICULOS" → "Seguro de Veículos" (simplificado) */
   titleCase(s) {
     if (!s) return s;
     const low = ['de', 'da', 'do', 'dos', 'das', 'e', 'em', 'ou', 'a', 'o'];
@@ -1008,7 +1005,7 @@ const Utils = {
 };
 
 /* ============================================================================
-   DOM — XSS-safe builder (createElement + textContent)
+   DOM — XSS-safe builder
    ============================================================================ */
 const DOM = {
   h(tag, props, children) {
@@ -1063,14 +1060,12 @@ const DataService = {
       try {
         const response = await fetch(url, { cache: 'no-store' });
         if (!response.ok) {
-          // 404: permite falha silenciosa quando silent404 = true
           if (silent404 && response.status === 404) throw new Error('404');
           throw new Error(`HTTP ${response.status} ${response.statusText}`);
         }
         return response;
       } catch (err) {
         lastError = err;
-        // Não tenta de novo em 404 silencioso
         if (silent404 && err.message === '404') throw err;
         if (attempt < retries) {
           const waitMs = backoff * Math.pow(2, attempt);
@@ -1091,7 +1086,6 @@ const DataService = {
   },
 
   async loadNaturezas() {
-    // Falha graciosa: se o arquivo não existir, segue sem o mapa
     try {
       const url = CONFIG.NATUREZAS_URL + '?v=' + Date.now();
       const response = await this.fetchWithRetry(url, { retries: 1, silent404: true });
@@ -1113,29 +1107,21 @@ const DataService = {
 };
 
 /* ============================================================================
-   NATUREZA MAP — lookup de código → descrição
+   NATUREZA MAP
    ============================================================================ */
 const NaturezaMap = {
   _map: {},
-
-  set(obj) {
-    this._map = obj && typeof obj === 'object' ? obj : {};
-  },
-
+  set(obj) { this._map = obj && typeof obj === 'object' ? obj : {}; },
   get(code) {
     if (!code) return null;
     return this._map[String(code).trim()] || null;
   },
-
   describe(code) {
     const desc = this.get(code);
     if (!desc) return null;
     return Utils.titleCase(desc);
   },
-
-  size() {
-    return Object.keys(this._map).length;
-  },
+  size() { return Object.keys(this._map).length; },
 };
 
 /* ============================================================================
@@ -1165,7 +1151,6 @@ const UI_Sidebar = {
       text.textContent = `atualizado em ${Utils.fmtDateTime(data.meta.generated_at)}`;
     }
   },
-
   setError() {
     const stamp = DOM.byId('stamp');
     const text = DOM.byId('stamp-text');
@@ -1175,30 +1160,19 @@ const UI_Sidebar = {
 };
 
 /* ============================================================================
-   PAGINATION WIDGET — reutilizado em UI_Hoje e UI_Previsto
+   PAGINATION WIDGET
    ============================================================================ */
 const Pagination = {
-  /**
-   * Constrói o container de paginação.
-   * @param {Object} opts { page, pageSize, total, onPage }
-   * @returns {HTMLElement|null} null se total ≤ pageSize (sem necessidade)
-   */
   render({ page, pageSize, total, onPage }) {
     if (total <= pageSize) return null;
-
     const totalPages = Math.ceil(total / pageSize);
     const start = (page - 1) * pageSize + 1;
     const end = Math.min(page * pageSize, total);
 
     const info = DOM.h('div', { class: 'pagination-info' }, [
-      'Mostrando ',
-      DOM.h('strong', {}, String(start)),
-      ' a ',
-      DOM.h('strong', {}, String(end)),
-      ' de ',
-      DOM.h('strong', {}, String(total)),
+      'Mostrando ', DOM.h('strong', {}, String(start)), ' a ', DOM.h('strong', {}, String(end)),
+      ' de ', DOM.h('strong', {}, String(total)),
     ]);
-
     const controls = DOM.h('div', { class: 'pagination-controls' });
 
     const mkBtn = (label, targetPage, { disabled = false, active = false, ariaLabel } = {}) => {
@@ -1214,12 +1188,9 @@ const Pagination = {
       return btn;
     };
 
-    // « primeira
     controls.appendChild(mkBtn(DOM.icon('fa-angles-left'), 1, { disabled: page === 1, ariaLabel: 'Primeira página' }));
-    // ‹ anterior
     controls.appendChild(mkBtn(DOM.icon('fa-angle-left'), page - 1, { disabled: page === 1, ariaLabel: 'Anterior' }));
-
-    // Números — estratégia: sempre mostrar 1, current±1, last, com elipses
+    
     const pages = this._computePageList(page, totalPages);
     for (const p of pages) {
       if (p === '…') {
@@ -1229,14 +1200,10 @@ const Pagination = {
       }
     }
 
-    // › próxima
     controls.appendChild(mkBtn(DOM.icon('fa-angle-right'), page + 1, { disabled: page === totalPages, ariaLabel: 'Próxima' }));
-    // » última
     controls.appendChild(mkBtn(DOM.icon('fa-angles-right'), totalPages, { disabled: page === totalPages, ariaLabel: 'Última página' }));
-
     return DOM.h('div', { class: 'pagination' }, [info, controls]);
   },
-
   _computePageList(current, total) {
     const pages = [];
     const window = 1;
@@ -1262,26 +1229,20 @@ const UI_Dashboard = {
       this._renderKPIs(data),
     ]);
   },
-
   _renderSectionHead(meta) {
     return DOM.h('div', { class: 'section-head' }, [
       DOM.h('div', { class: 'section-head-left' }, [
         DOM.h('h2', { class: 'section-title' }, [DOM.icon('fa-gauge-high'), 'Dashboard']),
         DOM.h('p', { class: 'section-sub' }, 'Visão consolidada de hoje e amanhã'),
       ]),
-      DOM.h('span', { class: 'date-badge' }, [
-        DOM.icon('fa-calendar'),
-        Utils.fmtDate(meta.data_hoje),
-      ]),
+      DOM.h('span', { class: 'date-badge' }, [DOM.icon('fa-calendar'), Utils.fmtDate(meta.data_hoje)]),
     ]);
   },
-
   _renderAlerts(data) {
     const alerts = this._buildAlerts(data);
     if (!alerts.length) return null;
     return DOM.h('div', { class: 'alerts' }, alerts);
   },
-
   _buildAlerts(data) {
     const arr = [];
     const { previsto_amanha: prev, pago_hoje: hoje } = data;
@@ -1291,18 +1252,17 @@ const UI_Dashboard = {
         DOM.h('strong', {}, `${prev.em_aprovacao} títulos pendentes de aprovação`),
       ]));
     }
-
     if (prev.total > hoje.total * 1.5 && hoje.total > 0) {
       const mult = (prev.total / hoje.total).toFixed(1);
       arr.push(this._buildAlert('info', 'fa-arrow-trend-up', [
         DOM.h('strong', {}, `Prévia de amanhã ${mult}× maior que hoje`),
       ]));
     }
-
     const forns = prev.nf_servico.concat(prev.nf_titulo, prev.reembolso)
       .map(x => (x.fornecedor || '').toUpperCase()).filter(Boolean);
     const hojeSet = new Set(hoje.titulos.map(t => (t.fornecedor || '').toUpperCase()).filter(Boolean));
     const recorrentes = [...new Set(forns.filter(f => hojeSet.has(f)))];
+    
     if (recorrentes.length) {
       const plural = recorrentes.length > 1;
       const exemplos = recorrentes.slice(0, 2).map(s => Utils.truncate(s, 28)).join(', ');
@@ -1312,21 +1272,17 @@ const UI_Dashboard = {
         DOM.h('small', {}, `Apareceram hoje e voltam amanhã. Ex.: ${exemplos}${more}.`),
       ]));
     }
-
     return arr;
   },
-
   _buildAlert(kind, iconCls, contentNodes) {
     return DOM.h('div', { class: 'alert ' + kind, role: 'alert' }, [
       DOM.h('div', { class: 'alert-icon' }, DOM.icon(iconCls)),
       DOM.h('div', {}, contentNodes),
     ]);
   },
-
   _renderKPIs(data) {
     const { pago_hoje: hoje, previsto_amanha: prev, meta } = data;
     const maiorForn = (hoje.maior && hoje.maior.fornecedor) ? hoje.maior.fornecedor : '—';
-
     return DOM.h('div', { class: 'kpi-grid' }, [
       this._buildKPI({
         accent: true, icon: 'fa-check-circle', label: 'Pago hoje',
@@ -1353,18 +1309,13 @@ const UI_Dashboard = {
       }),
     ]);
   },
-
   _buildKPI({ accent, icon, label, value, sub, subNode }) {
     return DOM.h('div', { class: 'kpi' + (accent ? ' accent' : '') }, [
       DOM.h('p', { class: 'kpi-label' }, [DOM.icon(icon), label]),
-      DOM.h('div', { class: 'kpi-value' }, [
-        DOM.h('span', { class: 'prefix' }, 'R$'),
-        Utils.fmtBRInt(value),
-      ]),
+      DOM.h('div', { class: 'kpi-value' }, [DOM.h('span', { class: 'prefix' }, 'R$'), Utils.fmtBRInt(value)]),
       DOM.h('p', { class: 'kpi-sub' }, subNode || sub),
     ]);
   },
-
   _buildKPIPlain({ icon, label, value, subNode }) {
     return DOM.h('div', { class: 'kpi' }, [
       DOM.h('p', { class: 'kpi-label' }, [DOM.icon(icon), label]),
@@ -1375,13 +1326,12 @@ const UI_Dashboard = {
 };
 
 /* ============================================================================
-   COMMON — builder de célula "Fornecedor + hist com natureza"
+   COMMON CELL
    ============================================================================ */
 function buildFornecedorCell(fornecedor, historicoRaw, natCode) {
   const children = [fornecedor || '—'];
   const natDesc = NaturezaMap.describe(natCode);
   const hasHist = historicoRaw && String(historicoRaw).trim();
-
   if (natDesc || hasHist) {
     const histInner = [];
     if (natDesc) histInner.push(DOM.h('span', { class: 'nat-tag' }, natDesc));
@@ -1392,85 +1342,44 @@ function buildFornecedorCell(fornecedor, historicoRaw, natCode) {
 }
 
 /* ============================================================================
-   UI_HOJE — Pagamentos Realizados (com paginação + debounce)
+   UI_HOJE
    ============================================================================ */
 const UI_Hoje = {
-  _state: null,
-  _data: null,
-  _meta: null,
-  _els: null,
-  _debouncedSearch: null,
+  _state: null, _data: null, _meta: null, _els: null, _debouncedSearch: null,
 
   render(data) {
     this._data = data.pago_hoje;
     this._meta = data.meta;
-    this._state = {
-      filter: { q: '', tipo: null },
-      sort:   { col: 'valor_rs', dir: -1 },
-      page: 1,
-      pageSize: CONFIG.PAGE_SIZE,
-    };
-
-    const section = DOM.h('section', { id: 'realizados', class: 'reveal' }, [
-      this._renderSectionHead(),
-      this._renderCard(),
-    ]);
-
-    this._debouncedSearch = Utils.debounce(value => {
-      this._state.filter.q = value;
-      this._state.page = 1;
-      this._refresh();
-    }, CONFIG.SEARCH_DEBOUNCE_MS);
-
+    this._state = { filter: { q: '', tipo: null }, sort: { col: 'valor_rs', dir: -1 }, page: 1, pageSize: CONFIG.PAGE_SIZE };
+    const section = DOM.h('section', { id: 'realizados', class: 'reveal' }, [this._renderSectionHead(), this._renderCard()]);
+    this._debouncedSearch = Utils.debounce(value => { this._state.filter.q = value; this._state.page = 1; this._refresh(); }, CONFIG.SEARCH_DEBOUNCE_MS);
     this._refresh();
     return section;
   },
-
   _renderSectionHead() {
     return DOM.h('div', { class: 'section-head' }, [
       DOM.h('div', { class: 'section-head-left' }, [
         DOM.h('h2', { class: 'section-title' }, [DOM.icon('fa-check-double'), 'Pagamentos Realizados']),
-        DOM.h('p', { class: 'section-sub' },
-          `${this._data.quantidade} títulos liquidados · Total R$ ${Utils.fmtBR(this._data.total)}`),
+        DOM.h('p', { class: 'section-sub' }, `${this._data.quantidade} títulos liquidados · Total R$ ${Utils.fmtBR(this._data.total)}`),
       ]),
-      DOM.h('span', { class: 'date-badge' }, [
-        DOM.icon('fa-calendar-check'),
-        Utils.fmtDate(this._meta.data_hoje),
-      ]),
+      DOM.h('span', { class: 'date-badge' }, [DOM.icon('fa-calendar-check'), Utils.fmtDate(this._meta.data_hoje)]),
     ]);
   },
-
   _columns() {
     return [
-      { key: 'tipo',       label: 'Tipo',
-        renderCell: t => DOM.pill(t.tipo || '?', Utils.pillClass(t.tipo)) },
-      { key: 'numero',     label: 'Título',
-        renderCell: t => String(t.numero || '—') },
-      { key: 'fornecedor', label: 'Fornecedor',
-        renderCell: t => buildFornecedorCell(t.fornecedor, t.historico, t.natureza) },
-      { key: 'valor_rs',   label: 'Valor',
-        num: true, strong: true, center: true,
-        renderCell: t => `R$ ${Utils.fmtBR(t.valor_rs)}` },
+      { key: 'tipo',       label: 'Tipo',       renderCell: t => DOM.pill(t.tipo || '?', Utils.pillClass(t.tipo)) },
+      { key: 'numero',     label: 'Título',     renderCell: t => String(t.numero || '—') },
+      { key: 'fornecedor', label: 'Fornecedor', renderCell: t => buildFornecedorCell(t.fornecedor, t.historico, t.natureza) },
+      { key: 'valor_rs',   label: 'Valor',      num: true, strong: true, center: true, renderCell: t => `R$ ${Utils.fmtBR(t.valor_rs)}` },
     ];
   },
-
   _renderCard() {
     const cols = this._columns();
     const tipos = [...new Set(this._data.titulos.map(t => t.tipo).filter(Boolean))].sort();
 
-    // Toolbar
-    const searchInput = DOM.h('input', {
-      id: 'hoje-search',
-      placeholder: 'Buscar fornecedor, histórico, título...',
-      type: 'text',
-      'aria-label': 'Buscar pagamentos realizados',
-    });
+    const searchInput = DOM.h('input', { id: 'hoje-search', placeholder: 'Buscar fornecedor, histórico, título...', type: 'text', 'aria-label': 'Buscar' });
     searchInput.addEventListener('input', e => this._debouncedSearch(e.target.value));
-
-    const searchBox = DOM.h('div', { class: 'search' }, [
-      DOM.icon('fa-magnifying-glass'),
-      searchInput,
-    ]);
+    const searchBox = DOM.h('div', { class: 'search' }, [DOM.icon('fa-magnifying-glass'), searchInput]);
 
     const allChip = this._buildFilterChip('', 'Todos', null, true);
     const tipoChips = tipos.map(t => this._buildFilterChip(t, t, Utils.pillClass(t), false));
@@ -1478,53 +1387,31 @@ const UI_Hoje = {
 
     const countEl = DOM.h('strong', { id: 'hoje-count' }, '0');
     const totalEl = DOM.h('strong', { id: 'hoje-total' }, 'R$ 0,00');
-
     const toolbarRight = DOM.h('div', { class: 'toolbar-right' }, [
-      DOM.h('span', { class: 'lbl' }, 'Total'),
-      countEl,
-      DOM.h('span', { class: 'divider' }),
-      DOM.h('span', { class: 'lbl' }, 'Soma'),
-      totalEl,
+      DOM.h('span', { class: 'lbl' }, 'Total'), countEl, DOM.h('span', { class: 'divider' }), DOM.h('span', { class: 'lbl' }, 'Soma'), totalEl,
     ]);
-
     const toolbar = DOM.h('div', { class: 'toolbar' }, [searchBox, ...chips, toolbarRight]);
 
-    // Table
-    const thead = DOM.h('thead', {}, DOM.h('tr', {},
-      cols.map(c => {
-        const th = DOM.h('th', {
-          class: [c.num ? 'num' : '', c.center ? 'center' : ''].filter(Boolean).join(' ') || null,
-          dataset: { key: c.key },
-        }, c.label);
-        th.addEventListener('click', () => {
-          if (this._state.sort.col === c.key) this._state.sort.dir *= -1;
-          else { this._state.sort.col = c.key; this._state.sort.dir = 1; }
-          this._state.page = 1;
-          this._refresh();
-        });
-        return th;
-      })
-    ));
-
+    const thead = DOM.h('thead', {}, DOM.h('tr', {}, cols.map(c => {
+      const th = DOM.h('th', { class: [c.num ? 'num' : '', c.center ? 'center' : ''].filter(Boolean).join(' ') || null, dataset: { key: c.key } }, c.label);
+      th.addEventListener('click', () => {
+        if (this._state.sort.col === c.key) this._state.sort.dir *= -1;
+        else { this._state.sort.col = c.key; this._state.sort.dir = 1; }
+        this._state.page = 1;
+        this._refresh();
+      });
+      return th;
+    })));
     const tbody = DOM.h('tbody', { id: 'hoje-tbody' });
     const tfoot = DOM.h('tfoot', { class: 'data', id: 'hoje-tfoot' });
     const table = DOM.h('table', { class: 'data' }, [thead, tbody, tfoot]);
-    const tableWrap = DOM.h('div', { class: 'table-wrap' }, table);
-
     const paginationMount = DOM.h('div', { id: 'hoje-pagination' });
 
     this._els = { tbody, tfoot, countEl, totalEl, thead, chips, cols, paginationMount };
-
-    return DOM.h('div', { class: 'card' }, [toolbar, tableWrap, paginationMount]);
+    return DOM.h('div', { class: 'card' }, [toolbar, DOM.h('div', { class: 'table-wrap' }, table), paginationMount]);
   },
-
   _buildFilterChip(tipoValue, label, pillCls, isActive) {
-    const chip = DOM.h('button', {
-      class: 'filter-chip' + (isActive ? ' active' : ''),
-      dataset: { tipo: tipoValue },
-      type: 'button',
-    }, pillCls ? DOM.pill(label, pillCls) : label);
-
+    const chip = DOM.h('button', { class: 'filter-chip' + (isActive ? ' active' : ''), dataset: { tipo: tipoValue }, type: 'button' }, pillCls ? DOM.pill(label, pillCls) : label);
     chip.addEventListener('click', () => {
       if (!this._els || !this._els.chips) return;
       this._els.chips.forEach(c => c.classList.remove('active'));
@@ -1535,82 +1422,53 @@ const UI_Hoje = {
     });
     return chip;
   },
-
   _filterAndSort() {
     const { q, tipo } = this._state.filter;
     const { col, dir } = this._state.sort;
-
     const rows = this._data.titulos.filter(t => {
       if (tipo && t.tipo !== tipo) return false;
       if (q) {
         const query = q.toLowerCase();
-        const blob = [t.fornecedor, t.historico, t.numero, t.natureza, NaturezaMap.get(t.natureza)]
-          .map(v => (v || '').toString().toLowerCase())
-          .join(' ');
+        const blob = [t.fornecedor, t.historico, t.numero, t.natureza, NaturezaMap.get(t.natureza)].map(v => (v || '').toString().toLowerCase()).join(' ');
         if (!blob.includes(query)) return false;
       }
       return true;
     });
-
     rows.sort((a, b) => Utils.compareRows(a, b, col, dir));
     return rows;
   },
-
   _refresh() {
     if (!this._els) return;
     const { tbody, tfoot, countEl, totalEl, thead, cols, paginationMount } = this._els;
     const { col, dir } = this._state.sort;
-
     const allFiltered = this._filterAndSort();
     const total = allFiltered.reduce((s, t) => s + (t.valor_rs || 0), 0);
+    
     countEl.textContent = String(allFiltered.length);
     totalEl.textContent = 'R$ ' + Utils.fmtBR(total);
 
-    // Paginar
     const start = (this._state.page - 1) * this._state.pageSize;
     const pageRows = allFiltered.slice(start, start + this._state.pageSize);
 
-    // TBODY
     DOM.clear(tbody);
-    if (pageRows.length === 0) {
-      tbody.appendChild(DOM.h('tr', {},
-        DOM.h('td', { class: 'empty-row', colspan: cols.length }, 'Nenhum resultado')
-      ));
-    } else {
-      for (const t of pageRows) tbody.appendChild(this._renderRow(t, cols));
-    }
+    if (pageRows.length === 0) tbody.appendChild(DOM.h('tr', {}, DOM.h('td', { class: 'empty-row', colspan: cols.length }, 'Nenhum resultado')));
+    else for (const t of pageRows) tbody.appendChild(this._renderRow(t, cols));
 
-    // TFOOT
     DOM.clear(tfoot);
     const spanCount = cols.length - 1;
-    tfoot.appendChild(DOM.h('tr', {}, [
-      DOM.h('td', { colspan: spanCount }, `Total exibido (${allFiltered.length} de ${this._data.titulos.length})`),
-      DOM.h('td', { class: 'num center' }, 'R$ ' + Utils.fmtBR(total)),
-    ]));
+    tfoot.appendChild(DOM.h('tr', {}, [DOM.h('td', { colspan: spanCount }, `Total exibido (${allFiltered.length} de ${this._data.titulos.length})`), DOM.h('td', { class: 'num center' }, 'R$ ' + Utils.fmtBR(total))]));
 
-    // Paginação
     DOM.clear(paginationMount);
-    const pag = Pagination.render({
-      page: this._state.page,
-      pageSize: this._state.pageSize,
-      total: allFiltered.length,
-      onPage: p => { this._state.page = p; this._refresh(); this._scrollToTop(); },
-    });
+    const pag = Pagination.render({ page: this._state.page, pageSize: this._state.pageSize, total: allFiltered.length, onPage: p => { this._state.page = p; this._refresh(); this._scrollToTop(); } });
     if (pag) paginationMount.appendChild(pag);
 
-    // Sort indicators
     thead.querySelectorAll('th').forEach(th => {
       const isSorted = th.dataset.key === col;
       th.classList.toggle('sorted', isSorted);
       th.dataset.dir = isSorted ? (dir > 0 ? ' ↑' : ' ↓') : '';
     });
   },
-
-  _scrollToTop() {
-    const sec = document.getElementById('realizados');
-    if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  },
-
+  _scrollToTop() { const sec = document.getElementById('realizados'); if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' }); },
   _renderRow(t, cols) {
     const tr = DOM.h('tr', {});
     for (const c of cols) {
@@ -1627,106 +1485,63 @@ const UI_Hoje = {
 };
 
 /* ============================================================================
-   UI_PREVISTO — Prévia de Pagamentos (com paginação + debounce, "Contas")
+   UI_PREVISTO
    ============================================================================ */
 const UI_Previsto = {
-  _state: null,
-  _data: null,
-  _meta: null,
-  _els: null,
-  _cats: null,
-  _debouncedSearch: null,
+  _state: null, _data: null, _meta: null, _els: null, _cats: null, _debouncedSearch: null,
 
   render(data) {
     this._data = data.previsto_amanha;
     this._meta = data.meta;
-
-    // RENOMEADO: "NFs de Título" → "Contas"
     this._cats = [
       { key: 'nf_servico', label: 'NFs de Serviço', icon: 'fa-truck',        data: this._data.nf_servico },
       { key: 'nf_titulo',  label: 'Contas',          icon: 'fa-file-invoice', data: this._data.nf_titulo },
       { key: 'reembolso',  label: 'Reembolsos',     icon: 'fa-receipt',      data: this._data.reembolso },
     ];
-
     const activeCat = this._cats.reduce((a, b) => a.data.length >= b.data.length ? a : b).key;
-
-    this._state = {
-      activeCat,
-      filter: { q: '' },
-      sort:   { col: 'valor_total', dir: -1 },
-      page: 1,
-      pageSize: CONFIG.PAGE_SIZE,
-    };
-
-    const section = DOM.h('section', { id: 'previsto', class: 'reveal' }, [
-      this._renderSectionHead(),
-      this._renderCard(),
-    ]);
-
-    this._debouncedSearch = Utils.debounce(value => {
-      this._state.filter.q = value;
-      this._state.page = 1;
-      this._refresh();
-    }, CONFIG.SEARCH_DEBOUNCE_MS);
-
+    this._state = { activeCat, filter: { q: '' }, sort: { col: 'valor_total', dir: -1 }, page: 1, pageSize: CONFIG.PAGE_SIZE };
+    const section = DOM.h('section', { id: 'previsto', class: 'reveal' }, [this._renderSectionHead(), this._renderCard()]);
+    this._debouncedSearch = Utils.debounce(value => { this._state.filter.q = value; this._state.page = 1; this._refresh(); }, CONFIG.SEARCH_DEBOUNCE_MS);
     this._refresh();
     return section;
   },
-
   _renderSectionHead() {
     return DOM.h('div', { class: 'section-head' }, [
       DOM.h('div', { class: 'section-head-left' }, [
         DOM.h('h2', { class: 'section-title' }, [DOM.icon('fa-calendar-day'), 'Prévia de Pagamentos']),
-        DOM.h('p', { class: 'section-sub' },
-          `${this._data.quantidade} títulos previstos · Total R$ ${Utils.fmtBR(this._data.total)}`),
+        DOM.h('p', { class: 'section-sub' }, `${this._data.quantidade} títulos previstos · Total R$ ${Utils.fmtBR(this._data.total)}`),
       ]),
-      DOM.h('span', { class: 'date-badge' }, [
-        DOM.icon('fa-calendar'),
-        Utils.fmtDate(this._meta.data_amanha),
-      ]),
+      DOM.h('span', { class: 'date-badge' }, [DOM.icon('fa-calendar'), Utils.fmtDate(this._meta.data_amanha)]),
     ]);
   },
-
   _columnsFor(catKey) {
     const common = {
       aprovador: { key: 'aprovador',   label: 'Aprovador', renderCell: r => r.aprovador || '—' },
       status:    { key: 'status',      label: 'Status',    renderCell: r => this._renderStatus(r.status) },
-      valor:     { key: 'valor_total', label: 'Valor',     num: true, strong: true, center: true,
-                   renderCell: r => `R$ ${Utils.fmtBR(r.valor_total)}` },
+      valor:     { key: 'valor_total', label: 'Valor',     num: true, strong: true, center: true, renderCell: r => `R$ ${Utils.fmtBR(r.valor_total)}` },
     };
-
     if (catKey === 'nf_servico') {
       return [
         { key: 'numero_nf',   label: 'NF',         renderCell: r => r.numero_nf || '—' },
-        { key: 'fornecedor',  label: 'Fornecedor',
-          renderCell: r => buildFornecedorCell(r.fornecedor, r.observacoes, r.natureza_cod) },
-        common.aprovador,
-        common.status,
-        common.valor,
+        { key: 'fornecedor',  label: 'Fornecedor', renderCell: r => buildFornecedorCell(r.fornecedor, r.observacoes, r.natureza_cod) },
+        common.aprovador, common.status, common.valor,
       ];
     }
     if (catKey === 'nf_titulo') {
       return [
         { key: 'numero_titulo', label: 'Título', renderCell: r => r.numero_titulo || '—' },
-        { key: 'fornecedor',    label: 'Fornecedor',
-          renderCell: r => buildFornecedorCell(r.fornecedor, r.historico, r.natureza_cod) },
-        common.aprovador,
-        common.status,
-        common.valor,
+        { key: 'fornecedor',    label: 'Fornecedor', renderCell: r => buildFornecedorCell(r.fornecedor, r.historico, r.natureza_cod) },
+        common.aprovador, common.status, common.valor,
       ];
     }
-    // reembolso
     return [
       { key: 'solicitante',      label: 'Solicitante',  renderCell: r => r.solicitante || '—' },
       { key: 'tipo_despesa',     label: 'Tipo despesa', renderCell: r => DOM.pill(r.tipo_despesa || '—') },
-      { key: 'fornecedor',       label: 'Beneficiário',
-        renderCell: r => buildFornecedorCell(r.fornecedor, '', r.natureza_cod) },
+      { key: 'fornecedor',       label: 'Beneficiário', renderCell: r => buildFornecedorCell(r.fornecedor, '', r.natureza_cod) },
       { key: 'tipo_solicitacao', label: 'Solicitação',  renderCell: r => r.tipo_solicitacao || '—' },
-      common.aprovador,
-      common.valor,
+      common.aprovador, common.valor,
     ];
   },
-
   _renderStatus(s) {
     if (!s) return DOM.pill('—');
     const low = s.toLowerCase();
@@ -1734,131 +1549,86 @@ const UI_Previsto = {
     if (/aguardando|baixa/.test(low)) return DOM.pill(s, 'ok');
     return DOM.pill(s);
   },
-
   _renderCard() {
-    // Cat summary
     const catItems = this._cats.map(c => {
       const isActive = c.key === this._state.activeCat;
-      const item = DOM.h('div', {
-        class: 'cat-item' + (isActive ? ' active' : ''),
-        dataset: { cat: c.key },
-        role: 'button',
-        tabindex: '0',
-      }, [
+      const item = DOM.h('div', { class: 'cat-item' + (isActive ? ' active' : ''), dataset: { cat: c.key }, role: 'button', tabindex: '0' }, [
         DOM.h('p', { class: 'cat-label' }, [DOM.icon(c.icon), c.label]),
         DOM.h('div', { class: 'cat-value' }, 'R$ ' + Utils.fmtBR(this._data.por_categoria[c.key].total)),
         DOM.h('p', { class: 'cat-sub' }, `${this._data.por_categoria[c.key].quantidade} títulos`),
       ]);
       item.addEventListener('click', () => this._switchCat(c.key));
-      item.addEventListener('keydown', e => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this._switchCat(c.key); }
-      });
+      item.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this._switchCat(c.key); } });
       return item;
     });
-
     const catSummary = DOM.h('div', { class: 'cat-summary' }, catItems);
 
-    // Tabs
     const tabs = this._cats.map(c => {
       const isActive = c.key === this._state.activeCat;
-      const tab = DOM.h('button', {
-        class: 'tab' + (isActive ? ' active' : ''),
-        dataset: { cat: c.key },
-        type: 'button',
-      }, [
-        DOM.icon(c.icon),
-        c.label,
-        DOM.h('span', { class: 'tab-count' }, String(c.data.length)),
+      const tab = DOM.h('button', { class: 'tab' + (isActive ? ' active' : ''), dataset: { cat: c.key }, type: 'button' }, [
+        DOM.icon(c.icon), c.label, DOM.h('span', { class: 'tab-count' }, String(c.data.length)),
       ]);
       tab.addEventListener('click', () => this._switchCat(c.key));
       return tab;
     });
     const tabsBar = DOM.h('div', { class: 'tabs', role: 'tablist' }, tabs);
 
-    // Toolbar
-    const searchInput = DOM.h('input', {
-      id: 'prev-search',
-      placeholder: 'Buscar fornecedor, solicitante, aprovador...',
-      type: 'text',
-      'aria-label': 'Buscar prévia de pagamentos',
-    });
+    const searchInput = DOM.h('input', { id: 'prev-search', placeholder: 'Buscar fornecedor, solicitante, aprovador...', type: 'text', 'aria-label': 'Buscar' });
     searchInput.addEventListener('input', e => this._debouncedSearch(e.target.value));
-
     const searchBox = DOM.h('div', { class: 'search' }, [DOM.icon('fa-magnifying-glass'), searchInput]);
-
     const countEl = DOM.h('strong', { id: 'prev-count' }, '0');
     const totalEl = DOM.h('strong', { id: 'prev-total' }, 'R$ 0,00');
-
-    const toolbarRight = DOM.h('div', { class: 'toolbar-right' }, [
-      DOM.h('span', { class: 'lbl' }, 'Total'),
-      countEl,
-      DOM.h('span', { class: 'divider' }),
-      DOM.h('span', { class: 'lbl' }, 'Soma'),
-      totalEl,
-    ]);
-
+    const toolbarRight = DOM.h('div', { class: 'toolbar-right' }, [DOM.h('span', { class: 'lbl' }, 'Total'), countEl, DOM.h('span', { class: 'divider' }), DOM.h('span', { class: 'lbl' }, 'Soma'), totalEl]);
     const toolbar = DOM.h('div', { class: 'toolbar' }, [searchBox, toolbarRight]);
 
     const thead = DOM.h('thead');
     const tbody = DOM.h('tbody', { id: 'prev-tbody' });
     const tfoot = DOM.h('tfoot', { class: 'data', id: 'prev-tfoot' });
     const table = DOM.h('table', { class: 'data' }, [thead, tbody, tfoot]);
-    const tableWrap = DOM.h('div', { class: 'table-wrap' }, table);
-
     const paginationMount = DOM.h('div', { id: 'prev-pagination' });
 
     this._els = { catItems, tabs, thead, tbody, tfoot, countEl, totalEl, searchInput, paginationMount };
-
-    return DOM.h('div', { class: 'card' }, [catSummary, tabsBar, toolbar, tableWrap, paginationMount]);
+    return DOM.h('div', { class: 'card' }, [catSummary, tabsBar, toolbar, DOM.h('div', { class: 'table-wrap' }, table), paginationMount]);
   },
-
   _switchCat(catKey) {
     if (catKey === this._state.activeCat) return;
     this._state.activeCat = catKey;
     this._state.sort = { col: 'valor_total', dir: -1 };
     this._state.page = 1;
-
     this._els.catItems.forEach(ci => ci.classList.toggle('active', ci.dataset.cat === catKey));
     this._els.tabs.forEach(t => t.classList.toggle('active', t.dataset.cat === catKey));
     this._refresh();
   },
-
   _filterAndSort(cols) {
     const { q } = this._state.filter;
     const { col, dir } = this._state.sort;
     const cat = this._cats.find(c => c.key === this._state.activeCat);
     const validCol = cols.find(c => c.key === col) ? col : cols[cols.length - 1].key;
-
     const rows = cat.data.filter(r => {
       if (!q) return true;
       const query = q.toLowerCase();
-      // Busca combinada: campos do registro + descrição de natureza
       const natDesc = NaturezaMap.get(r.natureza_cod) || '';
       const blob = (JSON.stringify(r) + ' ' + natDesc).toLowerCase();
       return blob.includes(query);
     });
-
     rows.sort((a, b) => Utils.compareRows(a, b, validCol, dir));
     return { rows, validCol };
   },
-
   _refresh() {
     if (!this._els) return;
     const { thead, tbody, tfoot, countEl, totalEl, paginationMount } = this._els;
     const { dir } = this._state.sort;
-
     const cat = this._cats.find(c => c.key === this._state.activeCat);
     const cols = this._columnsFor(this._state.activeCat);
     const { rows: allFiltered, validCol } = this._filterAndSort(cols);
-
     const total = allFiltered.reduce((s, r) => s + (r.valor_total || 0), 0);
+    
     countEl.textContent = String(allFiltered.length);
     totalEl.textContent = 'R$ ' + Utils.fmtBR(total);
 
     const start = (this._state.page - 1) * this._state.pageSize;
     const pageRows = allFiltered.slice(start, start + this._state.pageSize);
 
-    // THEAD
     DOM.clear(thead);
     const headerRow = DOM.h('tr', {});
     for (const c of cols) {
@@ -1877,41 +1647,24 @@ const UI_Previsto = {
     }
     thead.appendChild(headerRow);
 
-    // TBODY
     DOM.clear(tbody);
     if (pageRows.length === 0) {
-      tbody.appendChild(DOM.h('tr', {},
-        DOM.h('td', { class: 'empty-row', colspan: cols.length },
-          `Nenhum título ${cat.label.toLowerCase()} previsto`)
-      ));
+      tbody.appendChild(DOM.h('tr', {}, DOM.h('td', { class: 'empty-row', colspan: cols.length }, `Nenhum título ${cat.label.toLowerCase()} previsto`)));
     } else {
       for (const r of pageRows) tbody.appendChild(this._renderRow(r, cols));
     }
 
-    // TFOOT
     DOM.clear(tfoot);
     tfoot.appendChild(DOM.h('tr', {}, [
-      DOM.h('td', { colspan: cols.length - 1 },
-        `Total exibido (${allFiltered.length} de ${cat.data.length})`),
+      DOM.h('td', { colspan: cols.length - 1 }, `Total exibido (${allFiltered.length} de ${cat.data.length})`),
       DOM.h('td', { class: 'num center' }, 'R$ ' + Utils.fmtBR(total)),
     ]));
 
-    // Paginação
     DOM.clear(paginationMount);
-    const pag = Pagination.render({
-      page: this._state.page,
-      pageSize: this._state.pageSize,
-      total: allFiltered.length,
-      onPage: p => { this._state.page = p; this._refresh(); this._scrollToTop(); },
-    });
+    const pag = Pagination.render({ page: this._state.page, pageSize: this._state.pageSize, total: allFiltered.length, onPage: p => { this._state.page = p; this._refresh(); this._scrollToTop(); } });
     if (pag) paginationMount.appendChild(pag);
   },
-
-  _scrollToTop() {
-    const sec = document.getElementById('previsto');
-    if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  },
-
+  _scrollToTop() { const sec = document.getElementById('previsto'); if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' }); },
   _renderRow(r, cols) {
     const isRisk = Utils.isApprovalStatus(r.status);
     const tr = DOM.h('tr', { class: isRisk ? 'flag-approval' : null });
@@ -1932,20 +1685,12 @@ const UI_Previsto = {
    SCROLLSPY
    ============================================================================ */
 const ScrollSpy = {
-  _links: null,
-  _sections: null,
-  _ticking: false,
-  _offset: 120,
-
+  _links: null, _sections: null, _ticking: false, _offset: 120,
   init() {
     this._links = Array.from(document.querySelectorAll('[data-spy-link]'));
     if (!this._links.length) return;
-
-    this._sections = CONFIG.SECTIONS
-      .map(id => ({ id, el: document.getElementById(id) }))
-      .filter(s => s.el);
+    this._sections = CONFIG.SECTIONS.map(id => ({ id, el: document.getElementById(id) })).filter(s => s.el);
     if (!this._sections.length) return;
-
     this._links.forEach(link => {
       link.addEventListener('click', e => {
         const targetId = link.getAttribute('href').slice(1);
@@ -1956,30 +1701,21 @@ const ScrollSpy = {
         this._setActive(targetId);
       });
     });
-
     window.addEventListener('scroll', () => this._onScroll(), { passive: true });
     window.addEventListener('resize', () => this._onScroll(), { passive: true });
     this._onScroll();
   },
-
   _onScroll() {
     if (this._ticking) return;
     this._ticking = true;
-    requestAnimationFrame(() => {
-      this._update();
-      this._ticking = false;
-    });
+    requestAnimationFrame(() => { this._update(); this._ticking = false; });
   },
-
   _update() {
     const trigger = window.scrollY + this._offset;
     let activeId = this._sections[0].id;
-    for (const { id, el } of this._sections) {
-      if (el.offsetTop <= trigger) activeId = id;
-    }
+    for (const { id, el } of this._sections) { if (el.offsetTop <= trigger) activeId = id; }
     this._setActive(activeId);
   },
-
   _setActive(id) {
     this._links.forEach(l => {
       const href = l.getAttribute('href') || '';
@@ -1993,23 +1729,28 @@ const ScrollSpy = {
    ============================================================================ */
 const App = {
   async init() {
+    this._setupBackButton();
     try {
-      // Fetch paralelo: data obrigatório, naturezas opcional
       const [data, naturezas] = await Promise.all([
         DataService.loadData(),
         DataService.loadNaturezas(),
       ]);
-
       NaturezaMap.set(naturezas);
       UI_Sidebar.updateStamp(data);
       this._renderAll(data);
       ScrollSpy.init();
-
-      console.info(`[App] Dashboard pronto · ${NaturezaMap.size()} naturezas carregadas`);
     } catch (err) {
       console.error('[App] Falha ao carregar dashboard:', err);
       UI_Sidebar.setError();
       this._renderError(err);
+    }
+  },
+
+  _setupBackButton() {
+    const btn = document.querySelector('.btn-hub');
+    const ref = document.referrer;
+    if (btn && (!ref || !ref.includes(window.location.hostname))) {
+      btn.style.display = 'none';
     }
   },
 
