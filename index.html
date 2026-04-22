@@ -132,7 +132,7 @@
             justify-content: space-between; padding: 0 40px; position: sticky; top: 0; z-index: 50; gap: 16px; flex-wrap: wrap;
         }
         .header-left { display: flex; align-items: center; gap: 16px; }
-        .page-title { font-family: var(--font-display); font-size: 26px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .page-title { font-family: var(--font-display); font-size: 24px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
         .page-title i { color: var(--orange-main); }
         .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
@@ -227,7 +227,7 @@
         }
         .filter-chip:hover { border-color: var(--orange-main); color: var(--text-1); }
         
-        /* Correção Visual do Contraste para Pílulas Ativas (Ex: "NF" laranja sobre fundo laranja) */
+        /* Correção Visual do Contraste para Pílulas Ativas */
         .filter-chip.active { background: var(--orange-main); color: white; border-color: var(--orange-main); }
         .filter-chip.active .pill { background: rgba(255,255,255,0.25); color: #ffffff !important; border-color: transparent; }
         
@@ -236,7 +236,7 @@
         .toolbar-right strong { color: var(--orange-main); font-weight: 700; font-variant-numeric: tabular-nums; font-size: 14px;}
 
         /* ============================================================
-           TABELAS (Centralização da Coluna Valor)
+           TABELAS
            ============================================================ */
         .table-wrap { overflow-x: auto; }
         table.data { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
@@ -273,7 +273,7 @@
         tfoot.data .num { color: var(--orange-main); font-weight: 700; font-size: 14px; }
 
         /* ============================================================
-           ALERTAS (Totalmente limpos, focados na mensagem principal)
+           ALERTAS
            ============================================================ */
         .alerts { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-bottom: 24px; }
         .alert { padding: 14px 18px; border-radius: 12px; font-size: 13px; display: flex; gap: 12px; align-items: center; border: 1px solid var(--border-color); background: var(--surface-1); }
@@ -424,10 +424,7 @@ const DOM = {
 
 const Utils = {
     fmtBR: n => (n || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-    
-    // Formatador sem as casas decimais para os KPIs
     fmtBRNoDecimals: n => (n || 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 }),
-
     fmtDate: iso => {
         if (!iso) return '—';
         const d = new Date(iso + (iso.length === 10 ? 'T00:00:00' : ''));
@@ -493,7 +490,6 @@ const UI_Dashboard = {
         const hoje = d.pago_hoje;
         const alertList = [];
         
-        // Alertas totalmente limpos (Apenas Strong)
         if (prev.em_aprovacao > 0) {
             alertList.push(DOM.el('div', { className: 'alert warn' }, [
                 DOM.el('div', { className: 'alert-icon', textContent: '!' }),
@@ -573,7 +569,6 @@ const UI_Dashboard = {
 const UI_Hoje = {
     state: { filter: { q: '', tipo: null }, sort: { col: 'valor_rs', dir: -1 } },
     
-    // Colunas Ajustadas rigorosamente como solicitado (Inclusão de Tipo, remoção de Forma/Venc, Valor centralizado)
     cols: [
         { key: 'tipo', label: 'Tipo', center: true, render: t => DOM.el('span', { className: `pill ${Utils.pillClass(t.tipo)}`, textContent: t.tipo||'?' }) },
         { key: 'numero', label: 'Título', render: t => t.numero + (t.parcela ? '·'+t.parcela : '') },
@@ -588,7 +583,6 @@ const UI_Hoje = {
         const hoje = DataService.data.pago_hoje;
         const tipos = [...new Set(hoje.titulos.map(t => t.tipo).filter(Boolean))].sort();
 
-        // Cabeçalho com data destacada em laranja
         sec.appendChild(DOM.el('div', { className: 'section-head' }, [
             DOM.el('div', { style: 'width: 100%' }, [
                 DOM.el('h2', { className: 'section-title', innerHTML: `<i class="ph-fill ph-check-circle"></i> Pagamentos Realizados <span class="date">${Utils.fmtDate(DataService.data.meta.data_hoje)}</span>` })
@@ -612,7 +606,6 @@ const UI_Hoje = {
             toolbar.appendChild(btn);
         });
 
-        // Contagem Destacada
         toolbar.appendChild(DOM.el('span', { className: 'toolbar-right', innerHTML: `Mostrando <strong id="hoje-count">0</strong> · <strong id="hoje-total">R$ 0,00</strong>` }));
         card.appendChild(toolbar);
 
@@ -717,7 +710,6 @@ const UI_Hoje = {
 const UI_Previsto = {
     state: { filter: { q: '' }, sort: { col: 'valor_total', dir: -1 }, activeCat: null },
     
-    // Coluna "Empresa" Excluída. Coluna "valor_total" centralizada.
     colsBy: {
         nf_servico: [
             { key: 'numero_nf', label: 'NF', render: r => r.numero_nf || '—' },
