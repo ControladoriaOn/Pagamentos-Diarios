@@ -60,41 +60,35 @@
     font-size: 14.5px;
     line-height: 1.55;
     min-height: 100vh;
-    display: flex;
     -webkit-font-smoothing: antialiased;
   }
   section[id] { scroll-margin-top: 100px; }
 
   /* ============================================================
-     SIDEBAR — plum gradient (mesma identidade do hero do 1º index)
+     SIDEBAR — position: fixed garante que nunca saia da tela
      ============================================================ */
   .sidebar {
     width: 240px;
-    flex-shrink: 0;
     background: linear-gradient(170deg, var(--plum-deep) 0%, var(--plum) 55%, var(--plum-light) 100%);
     color: rgba(255,255,255,0.9);
     padding: 24px 18px;
     display: flex;
     flex-direction: column;
     gap: 4px;
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
+    bottom: 0;
     height: 100vh;
     z-index: 40;
-    position: relative;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
-  .sidebar::before {
-    content: '';
-    position: absolute;
-    top: -20%;
-    right: -50%;
-    width: 300px;
-    height: 300px;
-    background: radial-gradient(circle, rgba(255,110,0,0.18) 0%, transparent 65%);
-    pointer-events: none;
-  }
-  .sidebar > * { position: relative; }
+  /* Scrollbar fina e discreta no fundo plum */
+  .sidebar::-webkit-scrollbar { width: 6px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+  .sidebar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
   .sidebar .logo {
     font-family: var(--font-display);
     font-weight: 500;
@@ -107,6 +101,7 @@
     align-items: center;
     gap: 12px;
     color: #FFFFFF;
+    flex-shrink: 0;
   }
   .sidebar .logo-mark {
     width: 36px; height: 36px; border-radius: 9px;
@@ -161,6 +156,30 @@
     transition: color 0.15s;
   }
   .sidebar nav a:hover i, .sidebar nav a.active i { color: var(--orange); }
+
+  /* Links "em breve" — desabilitados com badge */
+  .sidebar nav a.coming-soon {
+    color: rgba(255,255,255,0.35);
+    cursor: not-allowed;
+    pointer-events: none;
+    position: relative;
+  }
+  .sidebar nav a.coming-soon i { color: rgba(255,255,255,0.25); }
+  .sidebar nav a.coming-soon::after {
+    content: 'em breve';
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.5);
+    border-radius: 4px;
+  }
 
   .sidebar-footer {
     margin-top: auto;
@@ -246,10 +265,11 @@
      MAIN CONTENT & HEADER
      ============================================================ */
   .main-content {
-    flex: 1;
+    margin-left: 240px;
     display: flex;
     flex-direction: column;
     min-width: 0;
+    min-height: 100vh;
   }
   header {
     height: 80px;
@@ -634,19 +654,24 @@
     margin-top: 3px;
     line-height: 1.45;
   }
-  .nat-tag {
+  .nat-desc {
     display: inline-block;
-    padding: 1px 7px;
+    padding: 3px 9px;
     background: var(--plum-mist);
     color: var(--plum-light);
-    border-radius: 4px;
+    border-radius: 6px;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    text-transform: none;
+    line-height: 1.3;
+    max-width: 220px;
+    white-space: normal;
+  }
+  .nat-empty {
+    color: var(--subtle);
     font-family: var(--font-mono);
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    margin-right: 6px;
-    text-transform: uppercase;
-    vertical-align: middle;
+    font-size: 11.5px;
   }
   .empty-row {
     text-align: center;
@@ -850,6 +875,7 @@
 
   @media (max-width: 1100px) {
     .sidebar { display: none; }
+    .main-content { margin-left: 0; }
     .kpi-grid { grid-template-columns: repeat(2, 1fr); }
     .cat-summary { grid-template-columns: 1fr; }
   }
@@ -884,6 +910,12 @@
     <a href="#previsto" data-spy-link>
       <i class="fa-solid fa-calendar-day"></i> Prévia de Pagamentos
     </a>
+    <a href="atualizar.html">
+      <i class="fa-solid fa-arrow-up-from-bracket"></i> Atualizar
+    </a>
+    <a href="#" class="coming-soon"><i class="fa-solid fa-file-invoice"></i> NFs</a>
+    <a href="#" class="coming-soon"><i class="fa-solid fa-receipt"></i> Reembolsos</a>
+    <a href="#" class="coming-soon"><i class="fa-solid fa-gear"></i> Ajustes</a>
   </nav>
 
   <div class="sidebar-footer">
@@ -1004,6 +1036,57 @@ const Utils = {
     return s.toLowerCase().split(/\s+/).map((w, i) =>
       i > 0 && low.includes(w) ? w : w.charAt(0).toUpperCase() + w.slice(1)
     ).join(' ');
+  },
+};
+
+/* ============================================================================
+   DATE UTILS — regra de dias úteis (sáb/dom → próxima segunda)
+   ============================================================================ */
+const DateUtils = {
+  /** true se o dia é sábado (6) ou domingo (0) */
+  isWeekend(date) {
+    const d = date.getDay();
+    return d === 0 || d === 6;
+  },
+
+  /** Converte 'YYYY-MM-DD' para Date local (sem timezone) */
+  fromISO(iso) {
+    if (!iso) return null;
+    const parts = iso.slice(0, 10).split('-');
+    if (parts.length !== 3) return null;
+    const d = new Date(+parts[0], +parts[1] - 1, +parts[2]);
+    return isNaN(d) ? null : d;
+  },
+
+  /** Converte Date para 'YYYY-MM-DD' */
+  toISO(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  },
+
+  /** Próximo dia útil a partir da data fornecida (não inclui o próprio dia).
+   *  Se for sexta → retorna segunda. Se for sábado → segunda. Se for domingo → segunda.
+   */
+  nextBusinessDay(date) {
+    const d = new Date(date);
+    d.setDate(d.getDate() + 1);
+    while (this.isWeekend(d)) d.setDate(d.getDate() + 1);
+    return d;
+  },
+
+  /** Se a data cai em fim de semana, retorna o próximo dia útil. Senão retorna a própria. */
+  ensureBusinessDay(date) {
+    if (!this.isWeekend(date)) return new Date(date);
+    const d = new Date(date);
+    while (this.isWeekend(d)) d.setDate(d.getDate() + 1);
+    return d;
+  },
+
+  /** Nome do dia da semana em PT-BR */
+  weekdayName(date) {
+    return date.toLocaleDateString(CONFIG.LOCALE, { weekday: 'long' });
   },
 };
 
@@ -1286,6 +1369,16 @@ const UI_Dashboard = {
     const arr = [];
     const { previsto_amanha: prev, pago_hoje: hoje } = data;
 
+    // Alerta de fim de semana: se data_hoje gravada cair em sábado/domingo
+    const dataHoje = DateUtils.fromISO(data.meta.data_hoje);
+    if (dataHoje && DateUtils.isWeekend(dataHoje)) {
+      const wd = DateUtils.weekdayName(dataHoje);
+      arr.push(this._buildAlert('info', 'fa-circle-info', [
+        DOM.h('strong', {}, `Dados gerados num ${wd}`),
+        DOM.h('small', {}, 'Como pagamentos ocorrem apenas em dias úteis, confira se deseja atualizar.'),
+      ]));
+    }
+
     if (prev.em_aprovacao > 0) {
       arr.push(this._buildAlert('warn', 'fa-triangle-exclamation', [
         DOM.h('strong', {}, `${prev.em_aprovacao} títulos pendentes de aprovação`),
@@ -1375,20 +1468,29 @@ const UI_Dashboard = {
 };
 
 /* ============================================================================
-   COMMON — builder de célula "Fornecedor + hist com natureza"
+   COMMON — builders de células reutilizáveis
    ============================================================================ */
-function buildFornecedorCell(fornecedor, historicoRaw, natCode) {
-  const children = [fornecedor || '—'];
-  const natDesc = NaturezaMap.describe(natCode);
-  const hasHist = historicoRaw && String(historicoRaw).trim();
 
-  if (natDesc || hasHist) {
-    const histInner = [];
-    if (natDesc) histInner.push(DOM.h('span', { class: 'nat-tag' }, natDesc));
-    if (hasHist) histInner.push(Utils.truncate(String(historicoRaw), 80));
-    children.push(DOM.h('div', { class: 'hist' }, histInner));
+/**
+ * Célula Fornecedor com histórico abaixo (sem natureza — ela tem coluna própria).
+ */
+function buildFornecedorCell(fornecedor, historicoRaw) {
+  const children = [fornecedor || '—'];
+  const hasHist = historicoRaw && String(historicoRaw).trim();
+  if (hasHist) {
+    children.push(DOM.h('div', { class: 'hist' }, Utils.truncate(String(historicoRaw), 90)));
   }
   return DOM.h('div', {}, children);
+}
+
+/**
+ * Célula Desc. Nat. — só a descrição legível. Sem mostrar código.
+ * Retorna '—' se a natureza não estiver no mapa.
+ */
+function buildDescNatCell(natCode) {
+  const desc = NaturezaMap.describe(natCode);
+  if (!desc) return DOM.h('span', { class: 'nat-empty' }, '—');
+  return DOM.h('span', { class: 'nat-desc' }, desc);
 }
 
 /* ============================================================================
@@ -1447,7 +1549,9 @@ const UI_Hoje = {
       { key: 'numero',     label: 'Título',
         renderCell: t => String(t.numero || '—') },
       { key: 'fornecedor', label: 'Fornecedor',
-        renderCell: t => buildFornecedorCell(t.fornecedor, t.historico, t.natureza) },
+        renderCell: t => buildFornecedorCell(t.fornecedor, t.historico) },
+      { key: 'natureza',   label: 'Desc. Nat.',
+        renderCell: t => buildDescNatCell(t.natureza) },
       { key: 'valor_rs',   label: 'Valor',
         num: true, strong: true, center: true,
         renderCell: t => `R$ ${Utils.fmtBR(t.valor_rs)}` },
@@ -1544,7 +1648,9 @@ const UI_Hoje = {
       if (tipo && t.tipo !== tipo) return false;
       if (q) {
         const query = q.toLowerCase();
-        const blob = [t.fornecedor, t.historico, t.numero, t.natureza, NaturezaMap.get(t.natureza)]
+        // Busca combinada: fornecedor, histórico, título, CÓDIGO da natureza e DESCRIÇÃO da natureza
+        const natDesc = NaturezaMap.get(t.natureza) || '';
+        const blob = [t.fornecedor, t.historico, t.numero, t.natureza, natDesc]
           .map(v => (v || '').toString().toLowerCase())
           .join(' ');
         if (!blob.includes(query)) return false;
@@ -1693,13 +1799,16 @@ const UI_Previsto = {
       status:    { key: 'status',      label: 'Status',    renderCell: r => this._renderStatus(r.status) },
       valor:     { key: 'valor_total', label: 'Valor',     num: true, strong: true, center: true,
                    renderCell: r => `R$ ${Utils.fmtBR(r.valor_total)}` },
+      descNat:   { key: 'natureza_cod', label: 'Desc. Nat.',
+                   renderCell: r => buildDescNatCell(r.natureza_cod) },
     };
 
     if (catKey === 'nf_servico') {
       return [
         { key: 'numero_nf',   label: 'NF',         renderCell: r => r.numero_nf || '—' },
         { key: 'fornecedor',  label: 'Fornecedor',
-          renderCell: r => buildFornecedorCell(r.fornecedor, r.observacoes, r.natureza_cod) },
+          renderCell: r => buildFornecedorCell(r.fornecedor, r.observacoes) },
+        common.descNat,
         common.aprovador,
         common.status,
         common.valor,
@@ -1709,7 +1818,8 @@ const UI_Previsto = {
       return [
         { key: 'numero_titulo', label: 'Título', renderCell: r => r.numero_titulo || '—' },
         { key: 'fornecedor',    label: 'Fornecedor',
-          renderCell: r => buildFornecedorCell(r.fornecedor, r.historico, r.natureza_cod) },
+          renderCell: r => buildFornecedorCell(r.fornecedor, r.historico) },
+        common.descNat,
         common.aprovador,
         common.status,
         common.valor,
@@ -1720,7 +1830,8 @@ const UI_Previsto = {
       { key: 'solicitante',      label: 'Solicitante',  renderCell: r => r.solicitante || '—' },
       { key: 'tipo_despesa',     label: 'Tipo despesa', renderCell: r => DOM.pill(r.tipo_despesa || '—') },
       { key: 'fornecedor',       label: 'Beneficiário',
-        renderCell: r => buildFornecedorCell(r.fornecedor, '', r.natureza_cod) },
+        renderCell: r => buildFornecedorCell(r.fornecedor, '') },
+      common.descNat,
       { key: 'tipo_solicitacao', label: 'Solicitação',  renderCell: r => r.tipo_solicitacao || '—' },
       common.aprovador,
       common.valor,
