@@ -83,6 +83,31 @@
   }
   .sidebar-placeholder a.active i { color: var(--orange-main); }
   .sidebar-placeholder a i { width: 16px; font-size: 13px; color: var(--text-3); }
+
+  /* Links "em breve" */
+  .sidebar-placeholder a.coming-soon {
+    color: var(--text-3);
+    cursor: not-allowed;
+    pointer-events: none;
+    position: relative;
+  }
+  .sidebar-placeholder a.coming-soon i { color: var(--text-3); opacity: 0.5; }
+  .sidebar-placeholder a.coming-soon::after {
+    content: 'em breve';
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    background: var(--surface-2);
+    color: var(--text-3);
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+  }
   .sidebar-placeholder .hint {
     margin-top: auto; padding: 10px 12px;
     background: var(--orange-soft);
@@ -377,9 +402,9 @@
   </div>
   <a href="index.html"><i class="fa-solid fa-chart-line"></i> Pagamentos</a>
   <a href="#" class="active"><i class="fa-solid fa-arrow-up-from-bracket"></i> Atualizar</a>
-  <a href="#"><i class="fa-solid fa-file-invoice"></i> Notas Fiscais</a>
-  <a href="#"><i class="fa-solid fa-receipt"></i> Reembolsos</a>
-  <a href="#"><i class="fa-solid fa-gear"></i> Ajustes</a>
+  <a href="#" class="coming-soon"><i class="fa-solid fa-file-invoice"></i> NFs</a>
+  <a href="#" class="coming-soon"><i class="fa-solid fa-receipt"></i> Reembolsos</a>
+  <a href="#" class="coming-soon"><i class="fa-solid fa-gear"></i> Ajustes</a>
   <div class="hint">Sidebar placeholder — substitua pela do hub ao integrar.</div>
 </aside>
 
@@ -725,9 +750,34 @@ function agregar(store) {
   const mm = String(Math.abs(tzMin % 60)).padStart(2,'0');
   const local = new Date(now.getTime() - tzMin*60000).toISOString().slice(0,-1);
   const iso = `${local}${sign}${hh}:${mm}`;
-  const dataHoje = now.toISOString().slice(0,10);
-  const vencs = todos.map(x => x.vencimento).filter(Boolean);
-  const dataAmanha = vencs.length ? vencs.sort().slice(-1)[0] : null;
+
+  // --- Regra de dias úteis ---
+  // Pagamentos ocorrem apenas em dias úteis (seg-sex).
+  // - data_hoje: se sistema está em sábado/domingo, usar próximo dia útil (segunda).
+  // - data_amanha: próximo dia útil a partir de data_hoje.
+  const isWeekend = d => d.getDay() === 0 || d.getDay() === 6;
+  const toISOLocal = d => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${dd}`;
+  };
+  const ensureBusinessDay = d => {
+    const x = new Date(d);
+    while (isWeekend(x)) x.setDate(x.getDate() + 1);
+    return x;
+  };
+  const nextBusinessDay = d => {
+    const x = new Date(d);
+    x.setDate(x.getDate() + 1);
+    while (isWeekend(x)) x.setDate(x.getDate() + 1);
+    return x;
+  };
+
+  const today = ensureBusinessDay(now);
+  const tomorrow = nextBusinessDay(today);
+  const dataHoje = toISOLocal(today);
+  const dataAmanha = toISOLocal(tomorrow);
   return {
     meta: { generated_at: iso, data_hoje: dataHoje, data_amanha: dataAmanha },
     pago_hoje: {
