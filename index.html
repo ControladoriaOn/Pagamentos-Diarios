@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Pagamentos · Dashboard</title>
 
+<!-- Favicon: apontando para raiz do repo (dashboard está em /Pagamentos/).
+     Fallback SVG inline garante que nunca dá 404. -->
+<link rel="icon" type="image/png" href="../favicon.png">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%233C003C'/%3E%3Ctext x='50%25' y='50%25' font-family='Georgia,serif' font-size='38' font-weight='700' fill='%23FF6E00' text-anchor='middle' dominant-baseline='central'%3E%E2%82%A3%3C/text%3E%3C/svg%3E">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -104,7 +109,7 @@
     flex-shrink: 0;
   }
   .sidebar .logo-mark {
-    width: 36px; height: 36px; border-radius: 9px;
+    width: 42px; height: 42px; border-radius: 10px;
     background: rgba(255,255,255,0.08);
     backdrop-filter: blur(4px);
     border: 1px solid rgba(255,255,255,0.12);
@@ -112,7 +117,15 @@
     color: var(--orange);
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: 18px;
+    font-size: 20px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .sidebar .logo-mark img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
   .sidebar .logo-text { display: flex; flex-direction: column; line-height: 1.1; }
   .sidebar .logo-text span:first-child { font-family: var(--font-display); font-weight: 500; font-size: 18px; }
@@ -157,7 +170,7 @@
   }
   .sidebar nav a:hover i, .sidebar nav a.active i { color: var(--orange); }
 
-  /* Links "em breve" — desabilitados com badge */
+  /* Links "em breve" — desabilitados com ícone de cadeado */
   .sidebar nav a.coming-soon {
     color: rgba(255,255,255,0.35);
     cursor: not-allowed;
@@ -166,19 +179,15 @@
   }
   .sidebar nav a.coming-soon i { color: rgba(255,255,255,0.25); }
   .sidebar nav a.coming-soon::after {
-    content: 'em breve';
+    content: '\f023'; /* FontAwesome lock */
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
     position: absolute;
-    right: 10px;
+    right: 12px;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 2px 6px;
-    background: rgba(255,255,255,0.08);
-    color: rgba(255,255,255,0.5);
-    border-radius: 4px;
+    font-size: 10px;
+    color: rgba(255,255,255,0.3);
   }
 
   .sidebar-footer {
@@ -254,6 +263,7 @@
     transition: all 0.15s;
     box-shadow: 0 6px 18px -8px rgba(255,110,0,0.55);
   }
+  .btn-hub[hidden] { display: none; }
   .btn-hub:hover {
     background: var(--orange-deep);
     border-color: var(--orange-deep);
@@ -698,6 +708,10 @@
   .pill.nf   { background: var(--orange-soft); color: var(--orange-deep); border-color: #F9C69C; }
   .pill.bol  { background: rgba(139,92,246,0.1); color: #7C3AED; border-color: rgba(139,92,246,0.3); }
   .pill.rd   { background: var(--ok-soft); color: var(--ok); border-color: #C2E4CC; }
+  .pill.pa   { background: rgba(14,165,233,0.1); color: #0369A1; border-color: rgba(14,165,233,0.3); }
+  .pill.ciot { background: rgba(99,102,241,0.12); color: #4338CA; border-color: rgba(99,102,241,0.3); }
+  .pill.bord-manual { background: var(--warn-soft); color: var(--warn); border-color: #F2D39A; font-family: var(--font-mono); }
+  .pill.bord-auto { background: var(--surface-soft); color: var(--muted); border-color: var(--border); font-family: var(--font-mono); }
 
   tfoot.data td {
     padding: 14px 16px;
@@ -894,7 +908,11 @@
 
 <aside class="sidebar" aria-label="Navegação principal">
   <div class="logo">
-    <div class="logo-mark">₣</div>
+    <div class="logo-mark">
+      <img src="../logo-mascote.jpg"
+           alt="Mascote Controladoria"
+           onerror="this.style.display='none'; this.parentNode.textContent='₣';">
+    </div>
     <div class="logo-text">
       <span>Financeiro</span>
       <span>Pagamentos</span>
@@ -913,7 +931,7 @@
     <a href="atualizar.html">
       <i class="fa-solid fa-arrow-up-from-bracket"></i> Atualizar
     </a>
-    <a href="#" class="coming-soon"><i class="fa-solid fa-file-invoice"></i> NFs</a>
+    <a href="#" class="coming-soon"><i class="fa-solid fa-file-invoice"></i> Notas Fiscais</a>
     <a href="#" class="coming-soon"><i class="fa-solid fa-receipt"></i> Reembolsos</a>
     <a href="#" class="coming-soon"><i class="fa-solid fa-gear"></i> Ajustes</a>
   </nav>
@@ -926,8 +944,9 @@
         <span class="stamp-text" id="stamp-text">carregando…</span>
       </div>
     </div>
-    <!-- TODO: Ajuste o href de "Voltar ao Hub" para a URL real do seu hub. -->
-    <a class="btn-hub" href="/" rel="noopener">
+    <!-- Botão "Voltar ao Hub": só aparece se o usuário veio do hub.
+         Controlado por JS (módulo HubLink). Href aponta para a raiz do repo. -->
+    <a id="btn-hub" class="btn-hub" href="../" rel="noopener" hidden>
       <i class="fa-solid fa-arrow-left-long"></i>
       Voltar ao Hub
     </a>
@@ -1006,7 +1025,7 @@ const Utils = {
     return s.length > n ? s.slice(0, n-1) + '…' : s;
   },
   pillClass(tipo) {
-    return ({ NF: 'nf', BOL: 'bol', RD: 'rd' })[tipo] || '';
+    return ({ NF: 'nf', BOL: 'bol', RD: 'rd', PA: 'pa', CIOT: 'ciot' })[tipo] || '';
   },
   compareRows(a, b, col, dir) {
     const va = a[col], vb = b[col];
@@ -1493,6 +1512,20 @@ function buildDescNatCell(natCode) {
   return DOM.h('span', { class: 'nat-desc' }, desc);
 }
 
+/**
+ * Célula Bordero — pílula visual.
+ * "Manual" recebe destaque laranja (pagamento adicionado fora do Totvs).
+ * Borderos numéricos ficam em cinza discreto (lote automático).
+ */
+function buildBorderoCell(bordero) {
+  const v = (bordero || '').trim();
+  if (!v) return DOM.h('span', { class: 'nat-empty' }, '—');
+  const isManual = v.toLowerCase() === 'manual';
+  return DOM.h('span', {
+    class: 'pill ' + (isManual ? 'bord-manual' : 'bord-auto'),
+  }, v);
+}
+
 /* ============================================================================
    UI_HOJE — Pagamentos Realizados (com paginação + debounce)
    ============================================================================ */
@@ -1552,6 +1585,8 @@ const UI_Hoje = {
         renderCell: t => buildFornecedorCell(t.fornecedor, t.historico) },
       { key: 'natureza',   label: 'Desc. Nat.',
         renderCell: t => buildDescNatCell(t.natureza) },
+      { key: 'bordero',    label: 'Bordero', center: true,
+        renderCell: t => buildBorderoCell(t.bordero) },
       { key: 'valor_rs',   label: 'Valor',
         num: true, strong: true, center: true,
         renderCell: t => `R$ ${Utils.fmtBR(t.valor_rs)}` },
@@ -1648,9 +1683,8 @@ const UI_Hoje = {
       if (tipo && t.tipo !== tipo) return false;
       if (q) {
         const query = q.toLowerCase();
-        // Busca combinada: fornecedor, histórico, título, CÓDIGO da natureza e DESCRIÇÃO da natureza
         const natDesc = NaturezaMap.get(t.natureza) || '';
-        const blob = [t.fornecedor, t.historico, t.numero, t.natureza, natDesc]
+        const blob = [t.fornecedor, t.historico, t.numero, t.natureza, natDesc, t.bordero, t.banco]
           .map(v => (v || '').toString().toLowerCase())
           .join(' ');
         if (!blob.includes(query)) return false;
@@ -2100,8 +2134,56 @@ const ScrollSpy = {
 };
 
 /* ============================================================================
-   APP — orquestração
+   HUB LINK — mostra botão "Voltar ao Hub" apenas se usuário veio do hub
+   Funciona em produção (github.io) E em localhost.
+
+   Aceita 3 sinais (qualquer um basta):
+   - document.referrer é uma página do mesmo origin, no path do hub, mas NÃO
+     no path do próprio dashboard (evita que reload conte como "vindo do hub")
+   - URL atual tem ?from=qualquer_valor (fallback robusto)
+   - sessionStorage tem flag 'came_from_hub' (persiste durante a aba)
    ============================================================================ */
+const HubLink = {
+  HUB_PATH_PREFIX: '/Controladoria',          // Path do hub no repo
+  SELF_PATH_PREFIX: '/Controladoria/Pagamentos', // Path do próprio dashboard
+  STORAGE_KEY: 'came_from_hub',
+
+  init() {
+    const btn = DOM.byId('btn-hub');
+    if (!btn) return;
+
+    if (this._userCameFromHub()) {
+      btn.hidden = false;
+      try { sessionStorage.setItem(this.STORAGE_KEY, '1'); } catch (e) { /* privacy mode */ }
+    }
+  },
+
+  _userCameFromHub() {
+    // 1. Referrer: same-origin, dentro do path do hub, mas fora do path deste dashboard
+    try {
+      if (document.referrer) {
+        const ref = new URL(document.referrer);
+        const sameOrigin = ref.origin === location.origin;
+        const isHubPath = ref.pathname.startsWith(this.HUB_PATH_PREFIX);
+        const isSelfPath = ref.pathname.startsWith(this.SELF_PATH_PREFIX);
+        if (sameOrigin && isHubPath && !isSelfPath) return true;
+      }
+    } catch (e) { /* URL inválida ou bloqueada */ }
+
+    // 2. Query string ?from=... (coloque no link do hub como seguro extra)
+    try {
+      const params = new URLSearchParams(location.search);
+      if (params.has('from')) return true;
+    } catch (e) { /* ignore */ }
+
+    // 3. SessionStorage (mantém o botão após F5 dentro da mesma aba)
+    try {
+      if (sessionStorage.getItem(this.STORAGE_KEY) === '1') return true;
+    } catch (e) { /* privacy mode */ }
+
+    return false;
+  },
+};
 const App = {
   async init() {
     try {
@@ -2113,6 +2195,7 @@ const App = {
 
       NaturezaMap.set(naturezas);
       UI_Sidebar.updateStamp(data);
+      HubLink.init();
       this._renderAll(data);
       ScrollSpy.init();
 
