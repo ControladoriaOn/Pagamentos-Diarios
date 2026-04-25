@@ -90,23 +90,20 @@
     cursor: not-allowed;
     pointer-events: none;
     position: relative;
+    opacity: 0.55;
   }
-  .sidebar-placeholder a.coming-soon i { color: var(--text-3); opacity: 0.5; }
+  .sidebar-placeholder a.coming-soon i { color: var(--text-3); }
   .sidebar-placeholder a.coming-soon::after {
-    content: 'em breve';
+    content: '\f023'; /* FontAwesome lock */
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
     position: absolute;
-    right: 10px;
+    right: 12px;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 2px 6px;
-    background: var(--surface-2);
+    font-size: 10px;
     color: var(--text-3);
-    border-radius: 4px;
-    border: 1px solid var(--border-color);
+    opacity: 0.6;
   }
   .sidebar-placeholder .hint {
     margin-top: auto; padding: 10px 12px;
@@ -281,12 +278,13 @@
     text-transform: uppercase; letter-spacing: 0.06em;
     border: 1px solid;
   }
-  .badge.protheus   { background: rgba(60,0,60,0.3);     color: #C89AC8;            border-color: rgba(200,154,200,0.3); }
-  .badge.nf_servico { background: rgba(255,110,0,0.12);  color: var(--orange-main); border-color: rgba(255,110,0,0.25); }
-  .badge.nf_titulo  { background: rgba(245,158,11,0.12); color: var(--status-warn); border-color: rgba(245,158,11,0.25); }
-  .badge.reembolso  { background: rgba(16,185,129,0.12); color: var(--status-ok);   border-color: rgba(16,185,129,0.25); }
-  .badge.naturezas  { background: rgba(139,92,246,0.12); color: #A78BFA;            border-color: rgba(139,92,246,0.3); }
-  .badge.err        { background: rgba(239,68,68,0.12);  color: var(--status-err);  border-color: rgba(239,68,68,0.25); }
+  .badge.protheus        { background: rgba(60,0,60,0.3);     color: #C89AC8;            border-color: rgba(200,154,200,0.3); }
+  .badge.relatorio_pagos { background: rgba(16,185,129,0.15); color: var(--status-ok);   border-color: rgba(16,185,129,0.3); }
+  .badge.nf_servico      { background: rgba(255,110,0,0.12);  color: var(--orange-main); border-color: rgba(255,110,0,0.25); }
+  .badge.nf_titulo       { background: rgba(245,158,11,0.12); color: var(--status-warn); border-color: rgba(245,158,11,0.25); }
+  .badge.reembolso       { background: rgba(16,185,129,0.12); color: var(--status-ok);   border-color: rgba(16,185,129,0.25); }
+  .badge.naturezas       { background: rgba(139,92,246,0.12); color: #A78BFA;            border-color: rgba(139,92,246,0.3); }
+  .badge.err             { background: rgba(239,68,68,0.12);  color: var(--status-err);  border-color: rgba(239,68,68,0.25); }
   .file-count {
     font-family: var(--font-mono); font-size: 12px;
     color: var(--text-3); min-width: 80px; text-align: right;
@@ -402,7 +400,7 @@
   </div>
   <a href="index.html"><i class="fa-solid fa-chart-line"></i> Pagamentos</a>
   <a href="#" class="active"><i class="fa-solid fa-arrow-up-from-bracket"></i> Atualizar</a>
-  <a href="#" class="coming-soon"><i class="fa-solid fa-file-invoice"></i> NFs</a>
+  <a href="#" class="coming-soon"><i class="fa-solid fa-file-invoice"></i> Notas Fiscais</a>
   <a href="#" class="coming-soon"><i class="fa-solid fa-receipt"></i> Reembolsos</a>
   <a href="#" class="coming-soon"><i class="fa-solid fa-gear"></i> Ajustes</a>
   <div class="hint">Sidebar placeholder — substitua pela do hub ao integrar.</div>
@@ -549,10 +547,8 @@ async function detectType(file) {
     const ws = wb.Sheets[wb.SheetNames[0]];
     const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
 
-    // Helper: normaliza (tira acento, lowercase)
     const norm = s => (s || '').toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 
-    // Procura linha de cabeçalho (até 15 linhas)
     for (let i = 0; i < Math.min(15, rows.length); i++) {
       const row = rows[i] || [];
       const originals = row.map(safeStr);
@@ -566,7 +562,14 @@ async function detectType(file) {
         return 'desconhecido';
       }
 
-      // Caso 2: é o mapa de naturezas (tem colunas código + descrição)
+      // Caso 2: RELATÓRIO CONTAS A PAGAR — header começa com "Banco" + tem "No. Titulo" e "Vlr.Titulo"
+      if (normalized[0] === 'banco' &&
+          originals.includes('No. Titulo') &&
+          originals.includes('Vlr.Titulo')) {
+        return 'relatorio_pagos';
+      }
+
+      // Caso 3: mapa de naturezas (colunas Código + Descrição)
       const hasCod  = normalized.some(h => h === 'codigo' || h === 'cod' || /^cod\s/.test(h) || /^cod\./.test(h) || /natureza/.test(h) && /cod/.test(h));
       const hasDesc = normalized.some(h => h === 'descricao' || h === 'desc' || /^desc/.test(h));
       if (hasCod && hasDesc) return 'naturezas';
@@ -599,6 +602,61 @@ async function parseProtheus(file) {
       historico: safeStr(r['Historico']),
       forma_pgto: safeStr(r['Forma Pgto.']),
       banco: safeStr(r['Banco For.']),
+      bordero: '',  // não existe no Protheus
+    });
+  }
+  return out;
+}
+
+/**
+ * Parser do RELATÓRIO CONTAS A PAGAR (planilha tratada manualmente).
+ * Substitui ou complementa o CSV do Protheus.
+ * Saída no mesmo schema dos pagamentos (campos compatíveis com UI_Hoje).
+ */
+async function parseRelatorio(file) {
+  const buf = await readAsArrayBuffer(file);
+  const wb = XLSX.read(buf, { type: 'array', cellDates: true });
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  // raw:true preserva números nativos (evita formatação US como string "41,569.83")
+  const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: true });
+
+  // Localiza linha de cabeçalho (a que começa com "Banco")
+  let headerIdx = -1;
+  for (let i = 0; i < Math.min(15, rows.length); i++) {
+    if (safeStr(rows[i][0]).toLowerCase() === 'banco') { headerIdx = i; break; }
+  }
+  if (headerIdx === -1) return [];
+
+  const headers = rows[headerIdx].map(safeStr);
+  const col = {};
+  headers.forEach((h, i) => { col[h] = i; });
+
+  const out = [];
+  for (let i = headerIdx + 1; i < rows.length; i++) {
+    const row = rows[i] || [];
+    const numero = safeStr(row[col['No. Titulo']]);
+    if (!numero) continue;
+
+    const venc = parseBRDate(row[col['Vencto Real']]);
+    out.push({
+      numero,
+      parcela: '',  // não existe nessa planilha
+      prefixo: '',
+      tipo: safeStr(row[col['Tipo']]),
+      natureza: safeStr(row[col['Natureza']]),
+      fornecedor_cod: '',
+      fornecedor: safeStr(row[col['Nome Fornece']]),
+      dt_emissao: null,
+      vencimento: venc,
+      dt_baixa: venc,  // nessa planilha são pagamentos do dia, vencto = baixa
+      valor: parseBRNumber(row[col['Vlr.Titulo']]),
+      valor_rs: parseBRNumber(row[col['Vlr.Titulo']]),
+      valor_liquido: parseBRNumber(row[col['Saldo']]),
+      historico: safeStr(row[col['Historico']]),
+      forma_pgto: '',  // não existe
+      banco: safeStr(row[col['Banco']]),
+      bordero: safeStr(row[col['Bordero']]),
+      fluxo_caixa: safeStr(row[col['Fluxo Caixa']]),
     });
   }
   return out;
@@ -807,12 +865,13 @@ const state = { files: [], store: null, naturezas: null, data: null };
 const el = id => document.getElementById(id);
 const fmtBR = n => n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const tipoLabels = {
-  protheus:   ['Pagamentos (Protheus)',   'protheus'],
-  nf_servico: ['NFs de Serviço',          'nf_servico'],
-  nf_titulo:  ['Contas',                  'nf_titulo'],
-  reembolso:  ['Reembolsos',              'reembolso'],
-  naturezas:  ['Mapa de Naturezas',       'naturezas'],
-  desconhecido: ['Não reconhecido',       'err'],
+  protheus:        ['Pagamentos (Protheus CSV)', 'protheus'],
+  relatorio_pagos: ['Pagamentos (Relatório)',    'relatorio_pagos'],
+  nf_servico:      ['NFs de Serviço',            'nf_servico'],
+  nf_titulo:       ['Contas',                    'nf_titulo'],
+  reembolso:       ['Reembolsos',                'reembolso'],
+  naturezas:       ['Mapa de Naturezas',         'naturezas'],
+  desconhecido:    ['Não reconhecido',           'err'],
 };
 function toast(msg) {
   const t = el('toast');
@@ -827,14 +886,17 @@ async function processFiles(files) {
     const entry = { file: f, tipo, count: 0, ok: tipo !== 'desconhecido', err: null };
     try {
       state.store = state.store || { protheus: [], nf_servico: [], nf_titulo: [], reembolso: [] };
-      if (tipo === 'protheus')        state.store.protheus   = await parseProtheus(f);
-      else if (tipo === 'nf_servico') state.store.nf_servico = await parseNFServico(f);
-      else if (tipo === 'nf_titulo')  state.store.nf_titulo  = await parseNFTitulo(f);
-      else if (tipo === 'reembolso')  state.store.reembolso  = await parseReembolso(f);
-      else if (tipo === 'naturezas')  state.naturezas        = await parseNaturezas(f);
+      if (tipo === 'protheus')             state.store.protheus   = await parseProtheus(f);
+      else if (tipo === 'relatorio_pagos') state.store.protheus   = await parseRelatorio(f);
+      else if (tipo === 'nf_servico')      state.store.nf_servico = await parseNFServico(f);
+      else if (tipo === 'nf_titulo')       state.store.nf_titulo  = await parseNFTitulo(f);
+      else if (tipo === 'reembolso')       state.store.reembolso  = await parseReembolso(f);
+      else if (tipo === 'naturezas')       state.naturezas        = await parseNaturezas(f);
 
       if (tipo === 'naturezas') {
         entry.count = state.naturezas ? Object.keys(state.naturezas).length : 0;
+      } else if (tipo === 'protheus' || tipo === 'relatorio_pagos') {
+        entry.count = state.store.protheus.length;
       } else {
         const arr = state.store && state.store[tipo];
         entry.count = Array.isArray(arr) ? arr.length : 0;
@@ -843,7 +905,12 @@ async function processFiles(files) {
       entry.ok = false;
       entry.err = e.message || String(e);
     }
-    state.files = state.files.filter(x => x.tipo !== tipo || tipo === 'desconhecido');
+    // Se um novo tipo de "pagos hoje" chegar (protheus OU relatorio), remove o anterior
+    if (tipo === 'protheus' || tipo === 'relatorio_pagos') {
+      state.files = state.files.filter(x => x.tipo !== 'protheus' && x.tipo !== 'relatorio_pagos');
+    } else {
+      state.files = state.files.filter(x => x.tipo !== tipo || tipo === 'desconhecido');
+    }
     state.files.push(entry);
   }
   render();
